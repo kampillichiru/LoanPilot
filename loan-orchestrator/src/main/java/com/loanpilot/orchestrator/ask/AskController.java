@@ -18,12 +18,14 @@ public class AskController {
         this.askService = askService;
     }
 
-    /** Quick browser/curl test: /api/ask?q=What is FOIR&temperature=0.0 */
+    /** Quick browser/curl test: /api/ask?q=What is FOIR&temperature=0.0&seed=42 */
     @GetMapping
     public AskResponse ask(@RequestParam("q") String question,
                            @RequestParam(value = "temperature", required = false) Double temperature,
-                           @RequestParam(value = "system", required = false) Boolean useSystemPrompt) {
-        return askService.ask(new AskRequest(question, temperature, useSystemPrompt));
+                           @RequestParam(value = "system", required = false) Boolean useSystemPrompt,
+                           @RequestParam(value = "seed", required = false) Integer seed,
+                           @RequestParam(value = "topK", required = false) Integer topK) {
+        return askService.ask(new AskRequest(question, temperature, useSystemPrompt, seed, topK));
     }
 
     @PostMapping

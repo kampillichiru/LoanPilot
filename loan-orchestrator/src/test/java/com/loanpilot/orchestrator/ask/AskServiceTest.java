@@ -11,7 +11,9 @@ import org.springframework.ai.chat.messages.SystemMessage;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.ai.chat.model.Generation;
+import org.springframework.ai.chat.prompt.ChatOptions;
 import org.springframework.ai.chat.prompt.Prompt;
+import org.springframework.ai.ollama.api.OllamaChatOptions;
 import org.springframework.core.io.ByteArrayResource;
 
 /**
@@ -28,6 +30,15 @@ class AskServiceTest {
         public ChatResponse call(Prompt prompt) {
             this.lastPrompt = prompt;
             return new ChatResponse(List.of(new Generation(new AssistantMessage("FOIR is fixed obligations to income ratio."))));
+        }
+
+        /**
+         * ChatClient merges request options INTO the model's defaults, so the defaults' type wins.
+         * The real OllamaChatModel has OllamaChatOptions defaults; mirror that or seed/topK get dropped.
+         */
+        @Override
+        public ChatOptions getOptions() {
+            return OllamaChatOptions.builder().build();
         }
     }
 
@@ -50,6 +61,19 @@ class AskServiceTest {
         assertThat(fakeModel.lastPrompt.getOptions().getTemperature()).isEqualTo(0.0);
         assertThat(fakeModel.lastPrompt.getInstructions())
                 .anySatisfy(m -> assertThat(m).isInstanceOf(SystemMessage.class));
+    }
+
+    @Test
+    void sendsSeedAndTopKForRepeatableAnswers() {
+        AskResponse response = service.ask(new AskRequest("What is FOIR?", 0.0, null, 42, 1));
+
+        assertThat(response.seed()).isEqualTo(42);
+        assertThat(response.topK()).isEqualTo(1);
+        assertThat(fakeModel.lastPrompt.getOptions()).isInstanceOf(OllamaChatOptions.class);
+        OllamaChatOptions sent = (OllamaChatOptions) fakeModel.lastPrompt.getOptions();
+        assertThat(sent.getSeed()).isEqualTo(42);
+        assertThat(sent.getTopK()).isEqualTo(1);
+        assertThat(sent.getTemperature()).isEqualTo(0.0);
     }
 
     @Test

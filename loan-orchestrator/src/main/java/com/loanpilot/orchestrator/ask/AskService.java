@@ -3,7 +3,7 @@ package com.loanpilot.orchestrator.ask;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.metadata.Usage;
 import org.springframework.ai.chat.model.ChatResponse;
-import org.springframework.ai.chat.prompt.ChatOptions;
+import org.springframework.ai.ollama.api.OllamaChatOptions;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
@@ -33,8 +33,15 @@ public class AskService {
         double temperature = request.temperature() != null ? request.temperature() : defaultTemperature;
         boolean useSystemPrompt = request.useSystemPrompt() == null || request.useSystemPrompt();
 
+        // Ollama-specific options: the generic ChatOptions has no seed.
+        // null seed/topK = not sent, so Ollama uses its defaults (random seed).
+        OllamaChatOptions.Builder options = OllamaChatOptions.builder()
+                .seed(request.seed())
+                .topK(request.topK())
+                .temperature(temperature);
+
         ChatClient.ChatClientRequestSpec spec = chatClient.prompt()
-                .options(ChatOptions.builder().temperature(temperature))
+                .options(options)
                 .user(request.question());
         if (useSystemPrompt) {
             spec = spec.system(systemPrompt);
@@ -53,6 +60,8 @@ public class AskService {
                 model,
                 useSystemPrompt ? promptVersion : "none",
                 temperature,
+                request.seed(),
+                request.topK(),
                 usage != null ? usage.getPromptTokens() : null,
                 usage != null ? usage.getCompletionTokens() : null,
                 latencyMs);

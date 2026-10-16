@@ -17,7 +17,7 @@
 ```
 curl / browser ──▶ AskController ──▶ AskService ──▶ ChatClient (Spring AI)
                                                        │  system prompt + user question
-                                                       │  + options (temperature)
+                                                       │  + options (temperature, seed, topK)
                                                        ▼
                                                  Ollama :11434  (qwen2.5:7b)
                                                        │
@@ -54,7 +54,10 @@ curl / browser ──▶ AskController ──▶ AskService ──▶ ChatClient
    → this is why POC 3 adds a Java `calculateEmi` **tool**.
 4. **Tokens & latency:** note `promptTokens`, `completionTokens`, `latencyMs`. How does a longer
    system prompt change them?
-5. **Prompt versioning:** copy the prompt to `banking-assistant-v2.st`, change it, switch
+5. **Repeatability:** run #8 (temperature 0, seed 42, topK 1) three times, then #9 (no seed).
+   Which one gives the identical answer every time? Same seed is only repeatable on the same
+   model build, Ollama version and hardware.
+6. **Prompt versioning:** copy the prompt to `banking-assistant-v2.st`, change it, switch
    `loanpilot.prompt.system` / `loanpilot.prompt.version`, and compare answers.
 
 Write what you found in `../LEARNINGS.md`.

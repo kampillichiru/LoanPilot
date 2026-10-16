@@ -36,7 +36,19 @@ Content-Type: application/json
 ### 7. Experiment: off-topic
 GET http://localhost:8080/api/ask?q=Write a poem about cricket
 
-### 8. Validation error (blank question → 400)
+### 8. Experiment: repeatable answers. Run 3 times: answer should be identical every time
+POST http://localhost:8080/api/ask
+Content-Type: application/json
+
+{ "question": "Give me a one-line definition of CIBIL score.", "temperature": 0.0, "seed": 42, "topK": 1 }
+
+### 9. Experiment: same as #8 but no seed. Run 3 times and compare with #8
+POST http://localhost:8080/api/ask
+Content-Type: application/json
+
+{ "question": "Give me a one-line definition of CIBIL score.", "temperature": 0.0 }
+
+### 10. Validation error (blank question → 400)
 POST http://localhost:8080/api/ask
 Content-Type: application/json
 
