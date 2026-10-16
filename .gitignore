@@ -1,0 +1,23 @@
+# Build output
+target/
+*.class
+
+# IDE
+.idea/
+*.iml
+.vscode/
+
+# Python
+__pycache__/
+.venv/
+*.pyc
+
+# Local data, secrets
+storage/
+*.db
+*.mv.db
+.env
+application-local.properties
+
+# OS
+Thumbs.db

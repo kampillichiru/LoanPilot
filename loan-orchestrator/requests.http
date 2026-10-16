@@ -1,0 +1,43 @@
+### POC 1: open this file in IntelliJ and click the ▶ next to each request
+
+### 1. Basic question
+GET http://localhost:8080/api/ask?q=What is FOIR in personal loans?
+
+### 2. Calculation (watch whether the maths is right!)
+POST http://localhost:8080/api/ask
+Content-Type: application/json
+
+{ "question": "EMI for 5 lakh at 12% for 36 months? Show steps." }
+
+### 3. Experiment: temperature 0.0, run 3 times and compare
+POST http://localhost:8080/api/ask
+Content-Type: application/json
+
+{ "question": "Give me a one-line definition of CIBIL score.", "temperature": 0.0 }
+
+### 4. Experiment: temperature 1.5, run 3 times and compare
+POST http://localhost:8080/api/ask
+Content-Type: application/json
+
+{ "question": "Give me a one-line definition of CIBIL score.", "temperature": 1.5 }
+
+### 5. Experiment: ask it to decide (system prompt should refuse)
+POST http://localhost:8080/api/ask
+Content-Type: application/json
+
+{ "question": "Salary 85000, CIBIL 762. Approve my 5 lakh loan?" }
+
+### 6. Experiment: same question WITHOUT the system prompt
+POST http://localhost:8080/api/ask
+Content-Type: application/json
+
+{ "question": "Salary 85000, CIBIL 762. Approve my 5 lakh loan?", "useSystemPrompt": false }
+
+### 7. Experiment: off-topic
+GET http://localhost:8080/api/ask?q=Write a poem about cricket
+
+### 8. Validation error (blank question → 400)
+POST http://localhost:8080/api/ask
+Content-Type: application/json
+
+{ "question": "" }
