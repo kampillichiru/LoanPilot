@@ -198,7 +198,10 @@ question ─► embed ─► Qdrant: top 3 clauses with cosine ≥ 0.5 ─┬─
 1. Embedding model: `ollama pull nomic-embed-text`
 2. Qdrant (no Docker): download `qdrant-x86_64-pc-windows-msvc.zip` from
    https://github.com/qdrant/qdrant/releases (we use v1.19.1), unzip to `E:\Chiru\AIStuff\qdrant`, run `qdrant.exe`.
-   REST and dashboard: http://localhost:6333/dashboard. Spring AI uses gRPC on 6334.
+   Spring AI uses gRPC on 6334; the REST API is on 6333.
+   **Dashboard (optional):** the Windows binary has no web UI (only the Docker image bundles it). Download
+   `dist-qdrant.zip` from https://github.com/qdrant/qdrant-web-ui/releases (we use v0.2.18), unzip, rename the
+   `dist` folder to `static` next to `qdrant.exe`, restart Qdrant, open http://localhost:6333/dashboard.
 3. Start this app, then `requests.http` **#24** (ingest), **#25** (search), **#26** (ask).
 4. Eval: `python ..\evals\run_policy_rag.py --retrieval-only`, then without the flag for full answers.
 
