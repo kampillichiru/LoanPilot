@@ -66,10 +66,20 @@ class RecordingToolCallback implements ToolCallback {
             return result;
         } catch (RuntimeException e) {
             long latencyMs = System.currentTimeMillis() - start;
-            calls.add(new ToolCallRecord(name, toolInput, null, e.getMessage(), latencyMs));
+            calls.add(new ToolCallRecord(name, toolInput, null, summary(e), latencyMs));
             log.warn("[advise {}] Tool '{}' threw {} after {} ms", requestId, name, e.getClass().getSimpleName(),
                     latencyMs);
             throw e;   // Spring AI decides what the model sees (by default: the error message)
         }
+    }
+
+    /** Root cause type and first line of its message: a remote failure's message can be a whole stack trace. */
+    private static String summary(Throwable e) {
+        Throwable root = e;
+        while (root.getCause() != null && root.getCause() != root) {
+            root = root.getCause();
+        }
+        String message = root.getMessage() != null ? root.getMessage().lines().findFirst().orElse("") : "";
+        return message.isBlank() ? root.getClass().getSimpleName() : root.getClass().getSimpleName() + ": " + message;
     }
 }

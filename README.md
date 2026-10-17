@@ -21,7 +21,7 @@ See [docs/architecture.md](docs/architecture.md) for the full end-to-end design.
 | 2 | Structured extraction from salary slips | Structured output, validation | `loan-orchestrator` | ✅ done (10/10 slips) |
 | 3 | Tool calling (EMI calc, mock CIBIL) | Agent loop, `@Tool` | `loan-orchestrator` | ✅ done |
 | 4 | First MCP server | MCP server, transports | `mcp-credit-bureau` | ✅ done |
-| 5 | MCP client | Remote tool discovery | `loan-orchestrator` | ⬜ |
+| 5 | MCP client | Remote tool discovery | `loan-orchestrator` | ✅ done |
 | 6 | RAG over credit policy | Embeddings, chunking, Qdrant | `policy-docs` + orchestrator | ⬜ |
 | 7 | Decision engine + agent workflow | LLM explains, code decides | `loan-orchestrator` | ⬜ |
 | 8 | Guardrails + evals | PII masking, audit, golden set | `evals` | ⬜ |
@@ -57,7 +57,7 @@ LoanPilot/
 | Qdrant | POC 6 | GitHub Releases → `qdrant-x86_64-pc-windows-msvc.zip`, run `qdrant.exe` |
 | Python 3.11+ | POC 2+ | ✅ already installed |
 
-## Quick start: POC 1–4
+## Quick start: POC 1–5
 
-- POC 1–3: [loan-orchestrator/README.md](loan-orchestrator/README.md)
+- POC 1–3, 5: [loan-orchestrator/README.md](loan-orchestrator/README.md)
 - POC 4: [mcp-credit-bureau/README.md](mcp-credit-bureau/README.md)

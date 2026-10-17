@@ -72,6 +72,15 @@ class McpProtocolTest {
     }
 
     @Test
+    void metaApplicantIdTravelsOverTheWireAndWins() {
+        // What Spring AI's MCP client does with the orchestrator's ToolContext: it becomes the request's _meta.
+        McpSchema.CallToolResult result = client.callTool(new McpSchema.CallToolRequest("getCreditReport",
+                Map.of("applicantName", "Priya"), Map.of("applicantId", "APP-002", "requestId", "test-1")));
+
+        assertThat(((McpSchema.TextContent) result.content().get(0)).text()).contains("\"applicantId\":\"APP-002\"");
+    }
+
+    @Test
     void callForUnknownApplicantIsNotFoundNotAnError() {
         McpSchema.CallToolResult result = client.callTool(
                 new McpSchema.CallToolRequest("getCreditReport", Map.of("applicantId", "APP-999")));

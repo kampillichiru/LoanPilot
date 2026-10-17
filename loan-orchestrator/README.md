@@ -118,3 +118,45 @@ slip text ──▶ ExtractService
    come back as 200 "valid"?
 4. **Arithmetic:** slip-09 has no Total Deductions line. Should the model add it up, or should Java
    compute it? (Hint: rule 1.)
+
+---
+
+## POC 3: Tool calling
+
+`/api/advise` runs the agent loop: the LLM turns a free-text question into tool requests, Java runs the
+tools, the LLM explains the results. It plans and explains; Java computes and (from POC 7) decides.
+
+| File | Purpose |
+|------|---------|
+| `advise/LoanTools.java` | Local `@Tool` methods: `calculateEmi` (BigDecimal, validated) |
+| `advise/AdviseService.java` | The agent loop: system prompt, local + MCP tools, ToolContext, empty-answer guard |
+| `advise/RecordingToolCallback.java` | Wraps every tool so `toolCalls` in the response shows name, args, result, error, timing |
+| `resources/prompts/loan-advisor-v*.st` | v1 baseline; v2 "affordability needs both tools"; v3 uses `getCreditReport` (POC 5) |
+
+Try `requests.http` #14–20. Read `toolCalls` first: it shows which numbers came from Java and which from the model.
+
+---
+
+## POC 5: MCP client
+
+The orchestrator no longer owns credit data. `getCreditReport` is discovered from `mcp-credit-bureau` over
+MCP and offered to the model next to the local `calculateEmi`; the model can't tell local from remote.
+
+```
+question ─► LLM ─► calculateEmi        (local @Tool, in-process)
+               └─► getCreditReport     (MCP tools/call ─► mcp-credit-bureau :8082)
+```
+
+**Run both:** start `mcp-credit-bureau` first (`..\mcp-credit-bureau\mvnw.cmd spring-boot:run`), then this app.
+Config: `spring.ai.mcp.client.streamable-http.connections.credit-bureau.*` in `application.properties`.
+
+| Behaviour | How |
+|-----------|-----|
+| Starts even if the bureau is down | `spring.ai.mcp.client.initialized=false`: connect on first use |
+| Bureau down at discovery | `getCreditReport` left out, `remoteToolsError` explains, answer says data unavailable |
+| Bureau dies after discovery | The tool call fails, the model is told, `toolCalls[].error` records it |
+| Bureau comes back | Picked up on the next request, no restart |
+| Code-supplied `applicantId` | Sent as MCP `_meta` (trusted, wins at the bureau) and mentioned to the model so it doesn't invent a name |
+| One question across two services | The same `[advise <id>]` / `[request <id>]` id appears in both logs |
+
+Try `requests.http` #21–23 (#23: stop the bureau first).

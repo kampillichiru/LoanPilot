@@ -48,6 +48,13 @@ Then in Claude Code: *"Use the credit-bureau tool to get Priya's credit report."
 **Rule 2 reminder:** Claude Code is a cloud LLM. Everything `getCreditReport` returns is sent to Anthropic.
 That's fine for this synthetic data; design the output as if it were real (no PAN).
 
+## Trusted caller data in `_meta` (POC 5)
+A calling service can send `applicantId` and `requestId` in the MCP request's `_meta` (Spring AI's MCP client
+does this with the caller's `ToolContext`). `_meta` is set by the caller's code, not its LLM, so a `_meta`
+applicantId wins over the tool arguments. `requestId` appears in this server's log for cross-service tracing.
+The `McpMeta` parameter is not in the tool's JSON schema, so no LLM sees it. **No auth yet:** any client can
+set `_meta`; production would trust it only from authenticated services.
+
 ## Mock data (`BureauRepository`, all synthetic)
 | Id | Name | CIBIL | Active accts | Existing EMI | 90+ DPD | Enquiries 6m | Path |
 |---|---|---|---|---|---|---|---|

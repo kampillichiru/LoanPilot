@@ -77,13 +77,13 @@ Content-Type: text/plain
 ### ===================== POC 3: tool calling =====================
 ### Check "toolCalls" in each response: which tools ran, with what arguments, and what they returned.
 
-### 14. Done-when question: should call BOTH calculateEmi and getCibilScore
+### 14. Done-when question (POC 3 and POC 5): calculateEmi (local) AND getCreditReport (over MCP). Start mcp-credit-bureau first
 POST http://localhost:8080/api/advise
 Content-Type: application/json
 
 { "question": "Can Priya afford 5 lakh for 3 years at 12%?" }
 
-### 15. Same question, applicant id supplied by code via ToolContext (the model never sees it)
+### 15. Same question, applicant id supplied by code: trusted copy via ToolContext -> MCP _meta (wins at the bureau)
 POST http://localhost:8080/api/advise
 Content-Type: application/json
 
@@ -98,7 +98,7 @@ Content-Type: application/json
 ### 17. No tool needed: should answer without calling anything
 GET http://localhost:8080/api/advise?q=What does FOIR stand for?
 
-### 18. Missing data: Arjun has no credit history. What does the model do with "no score"?
+### 18. Missing data: Arjun has no credit history (bureau says NO_CREDIT_HISTORY). What does the model do with "no score"?
 POST http://localhost:8080/api/advise
 Content-Type: application/json
 
@@ -112,3 +112,22 @@ POST http://localhost:8080/api/advise
 Content-Type: application/json
 
 { "question": "Approve Rahul's 4 lakh loan for 3 years at 14%." }
+
+### ===================== POC 5: MCP client =====================
+### Tools now come from two places: calculateEmi (local) and getCreditReport (mcp-credit-bureau over MCP).
+### "toolsAvailable" lists both; "remoteToolsError" says why getCreditReport is missing if the bureau is down.
+
+### 21. A fact only the bureau knows (existing EMIs, enquiries): should call getCreditReport only
+GET http://localhost:8080/api/advise?q=What are Rahul's existing EMIs and recent credit enquiries?
+
+### 22. New applicant that only exists in the bureau (Sneha, APP-004): proves the data comes from MCP
+POST http://localhost:8080/api/advise
+Content-Type: application/json
+
+{ "question": "Can Sneha afford 8 lakh for 4 years at 11%?" }
+
+### 23. Resilience: STOP mcp-credit-bureau, then run this. Expect remoteToolsError set and no invented score
+POST http://localhost:8080/api/advise
+Content-Type: application/json
+
+{ "question": "Can Priya afford 5 lakh for 3 years at 12%?" }

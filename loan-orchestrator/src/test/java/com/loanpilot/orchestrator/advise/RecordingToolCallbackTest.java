@@ -71,7 +71,7 @@ class RecordingToolCallbackTest {
 
         assertThat(calls).singleElement().satisfies(c -> {
             assertThat(c.result()).isNull();
-            assertThat(c.error()).isEqualTo("tool failed");
+            assertThat(c.error()).isEqualTo("IllegalStateException: tool failed");
         });
     }
 

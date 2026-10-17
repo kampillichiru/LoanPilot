@@ -3,31 +3,23 @@ package com.loanpilot.orchestrator.advise;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.math.RoundingMode;
-import java.util.Optional;
 
-import org.springframework.ai.chat.model.ToolContext;
 import org.springframework.ai.tool.annotation.Tool;
 import org.springframework.ai.tool.annotation.ToolParam;
 import org.springframework.stereotype.Component;
 
-import static org.springframework.util.StringUtils.hasText;
-
 /**
- * POC 3: the tools the model can call. Every @Tool method here is offered to the model by AdviseService.
+ * Local tools: pure calculations that belong inside the orchestrator. AdviseService offers every @Tool method
+ * here to the model, together with the tools discovered over MCP.
  *
- * The model only sees: the tool name (method name), the @Tool description, and each parameter's name, type
- * and @ToolParam description. That text decides WHEN the model calls a tool and HOW it fills the arguments,
- * so it is written like a prompt.
+ * POC 5: getCibilScore moved out. Credit data now comes from the mcp-credit-bureau server (getCreditReport),
+ * which owns that data. Rule of thumb: maths stays in-process (no network hop, no shared state to own);
+ * data owned by another domain comes over MCP.
  *
  * Design choices:
- * - Tools return facts, never verdicts (rule 1). No "affordable" / "approve" field anywhere: that decision
- *   belongs to the rules engine (POC 7). The model can only explain numbers Java produced.
- * - No PAN in or out (rule 2). getCibilScore takes a name or uses the applicantId from ToolContext; the PAN
- *   lookup stays in Java. The model never needs to see, generate or repeat a PAN.
- * - "No data" is a normal answer, not an exception: an explicit status the model can read and repeat,
- *   instead of a stack-trace message it might paraphrase into a guess.
- * - Bad arguments DO throw IllegalArgumentException with a plain message. Spring AI sends that message back
- *   to the model, which usually retries with corrected arguments.
+ * - Tools return facts, never verdicts (rule 1). No "affordable" / "approve" field.
+ * - Bad arguments throw IllegalArgumentException with a plain message. Spring AI sends that message back to
+ *   the model, which usually retries with corrected arguments.
  */
 @Component
 public class LoanTools {
@@ -35,22 +27,9 @@ public class LoanTools {
     private static final MathContext MC = MathContext.DECIMAL64;
     private static final BigDecimal TWELVE_HUNDRED = new BigDecimal("1200");
 
-    private final ApplicantDirectory applicants;
-
-    public LoanTools(ApplicantDirectory applicants) {
-        this.applicants = applicants;
-    }
-
     /** EMI result. Amounts in rupees, rounded to the nearest rupee as banks show them. */
     public record EmiResult(BigDecimal monthlyEmi, BigDecimal totalInterest, BigDecimal totalPayable,
                             BigDecimal principal, BigDecimal annualRatePercent, int months) {
-    }
-
-    /**
-     * @param status  FOUND, NO_CREDIT_HISTORY (score is null: no bureau record yet) or NOT_FOUND
-     * @param note    a sentence the model can repeat as-is, so it doesn't have to interpret the status
-     */
-    public record CibilResult(String applicantId, Integer cibilScore, String status, String note) {
     }
 
     @Tool(description = """
@@ -65,32 +44,6 @@ public class LoanTools {
             @ToolParam(description = "Loan tenure in months, e.g. 36 for 3 years")
             int months) {
         return emi(principal, annualRatePercent, months);
-    }
-
-    @Tool(description = """
-            Returns the applicant's current CIBIL credit score (300-900) from the credit bureau. Use it whenever \
-            the question involves an applicant's creditworthiness, eligibility or ability to borrow. If the result \
-            has no score, say so: never estimate or invent a credit score.""")
-    public CibilResult getCibilScore(
-            @ToolParam(required = false,
-                    description = "Applicant's name as written in the question, e.g. Priya. Leave empty if no name is given")
-            String applicantName,
-            ToolContext toolContext) {
-        // Code-supplied id wins over a name the model extracted: less room for the model to pick the wrong person.
-        Optional<Applicant> applicant = contextApplicantId(toolContext)
-                .flatMap(applicants::findById)
-                .or(() -> hasText(applicantName) ? applicants.findByName(applicantName) : Optional.empty());
-
-        if (applicant.isEmpty()) {
-            return new CibilResult(null, null, "NOT_FOUND",
-                    "No applicant found with that name. Do not guess a score; ask for the applicant's full name or id.");
-        }
-        Applicant a = applicant.get();
-        if (a.cibilScore() == null) {
-            return new CibilResult(a.id(), null, "NO_CREDIT_HISTORY",
-                    "The bureau has no credit history for this applicant, so there is no CIBIL score.");
-        }
-        return new CibilResult(a.id(), a.cibilScore(), "FOUND", "CIBIL score from the credit bureau.");
     }
 
     /**
@@ -121,14 +74,5 @@ public class LoanTools {
         BigDecimal totalPayable = monthlyEmi.multiply(BigDecimal.valueOf(months));
         return new EmiResult(monthlyEmi, totalPayable.subtract(principal).setScale(0, RoundingMode.HALF_UP),
                 totalPayable, principal, annualRatePercent, months);
-    }
-
-    private static Optional<String> contextApplicantId(ToolContext toolContext) {
-        if (toolContext == null || toolContext.getContext() == null) {
-            return Optional.empty();
-        }
-        return toolContext.getContext().get("applicantId") instanceof String id && hasText(id)
-                ? Optional.of(id)
-                : Optional.empty();
     }
 }

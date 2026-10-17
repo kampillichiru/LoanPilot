@@ -7,7 +7,10 @@ import java.util.List;
  *
  * @param toolCalls       every tool the model called, in order. Empty = the model answered from its own
  *                        "knowledge" (POC 3 done-when needs both tools here for the Priya question)
- * @param toolsAvailable  tool names offered to the model. Empty = LoanTools has no @Tool methods yet
+ * @param toolsAvailable  tool names offered to the model: local @Tool methods plus tools discovered over MCP
+ * @param remoteToolsError null when remote tool discovery worked; otherwise why MCP tools (e.g. getCreditReport)
+ *                        were missing from this request. A bureau that dies AFTER discovery shows up instead as
+ *                        an error on that tool's entry in toolCalls
  * @param inputSha256     hash of the question, for auditing without storing it (rule 3)
  * @param promptTokens    tokens of the FINAL LLM call only. Each tool round-trip is another call, so the
  *                        real total is higher. Compare latencyMs with and without tools to see the cost
@@ -17,6 +20,7 @@ public record AdviseResponse(
         String answer,
         List<ToolCallRecord> toolCalls,
         List<String> toolsAvailable,
+        String remoteToolsError,
         String model,
         String promptVersion,
         String inputSha256,
