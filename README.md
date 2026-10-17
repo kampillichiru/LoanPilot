@@ -17,8 +17,8 @@ See [docs/architecture.md](docs/architecture.md) for the full end-to-end design.
 
 | # | Mini-POC | Concept | Module | Status |
 |---|----------|---------|--------|--------|
-| 1 | Talk to a local LLM from Java | Prompts, system prompts, temperature, tokens | `loan-orchestrator` | ✅ scaffolded |
-| 2 | Structured extraction from salary slips | Structured output, validation | `loan-orchestrator` | ⬜ |
+| 1 | Talk to a local LLM from Java | Prompts, system prompts, temperature, tokens | `loan-orchestrator` | ✅ done |
+| 2 | Structured extraction from salary slips | Structured output, validation | `loan-orchestrator` | ✅ done (10/10 slips) |
 | 3 | Tool calling (EMI calc, mock CIBIL) | Agent loop, `@Tool` | `loan-orchestrator` | ⬜ |
 | 4 | First MCP server | MCP server, transports | `mcp-credit-bureau` | ⬜ |
 | 5 | MCP client | Remote tool discovery | `loan-orchestrator` | ⬜ |
@@ -57,6 +57,6 @@ LoanPilot/
 | Qdrant | POC 6 | GitHub Releases → `qdrant-x86_64-pc-windows-msvc.zip`, run `qdrant.exe` |
 | Python 3.11+ | POC 2+ | ✅ already installed |
 
-## Quick start: POC 1
+## Quick start: POC 1–2
 
 See [loan-orchestrator/README.md](loan-orchestrator/README.md).
