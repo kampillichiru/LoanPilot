@@ -160,3 +160,81 @@ Config: `spring.ai.mcp.client.streamable-http.connections.credit-bureau.*` in `a
 | One question across two services | The same `[advise <id>]` / `[request <id>]` id appears in both logs |
 
 Try `requests.http` #21–23 (#23: stop the bureau first).
+
+---
+
+## POC 6: RAG over the credit policy
+
+The model never saw LoanPilot Bank's policy in training (POC 1 invented a meaning for FOIR). RAG fixes that:
+**find** the relevant clauses first, then let the model answer **only from them**, citing each one.
+
+```
+INGEST (once, and after every policy edit)
+credit-policy-v1.md ─► PolicyChunker ─► 30 clauses ─► nomic-embed-text ─► Qdrant "credit-policy"
+                       (one per §)      (+ breadcrumb)   (768 numbers each)  (vector + text + section)
+
+ASK (every request)
+question ─► embed ─► Qdrant: top 3 clauses with cosine ≥ 0.5 ─┬─ none? ─► "not covered" (code, no LLM)   guard 1
+                                                                └─► LLM: clauses + question ─► answer + §citations
+                                                                        └─► every § cited must be retrieved          guard 2
+```
+
+### What's here
+
+| File | Purpose |
+|------|---------|
+| `../policy-docs/credit-policy-v1.md` | Synthetic credit policy, 30 numbered clauses |
+| `policy/PolicyChunker.java` | Splits the policy: `CLAUSE` (one chunk per §, with a heading breadcrumb) or `FIXED` (every N chars) |
+| `policy/PolicyIngestService.java` | Chunk → embed → store. Deletes the doc's old chunks first, stable UUIDs, so re-ingest never duplicates |
+| `policy/QdrantVectorCollection.java` | Creates the collection on first ingest (768 dims, cosine), so the app starts without Qdrant |
+| `policy/PolicyService.java` | Retrieve (explicitly, not via `QuestionAnswerAdvisor`), both guards, LLM call, citation check |
+| `policy/PolicyController.java` | `POST /api/policy/ingest`, `GET /api/policy/search` (no LLM), `GET/POST /api/policy/ask` |
+| `resources/prompts/policy-qa-v*.st` | Grounding rules: clauses only, cite §, say "not covered", no applicant data. v2 fixes citing a definition instead of the rule |
+| `test/.../policy/*Test.java` | Chunker + pipeline tests with an in-memory vector store and a fake embedding model |
+| `../evals/run_policy_rag.py` | 16 questions with expected § (incl. traps): hit@1, hit@k, citation accuracy |
+
+### Run it
+
+1. Embedding model: `ollama pull nomic-embed-text`
+2. Qdrant (no Docker): download `qdrant-x86_64-pc-windows-msvc.zip` from
+   https://github.com/qdrant/qdrant/releases (we use v1.19.1), unzip to `E:\Chiru\AIStuff\qdrant`, run `qdrant.exe`.
+   REST and dashboard: http://localhost:6333/dashboard. Spring AI uses gRPC on 6334.
+3. Start this app, then `requests.http` **#24** (ingest), **#25** (search), **#26** (ask).
+4. Eval: `python ..\evals\run_policy_rag.py --retrieval-only`, then without the flag for full answers.
+
+### Results (qwen2.5:7b + nomic-embed-text, top-k 3, min-score 0.5)
+
+**Retrieval** (`--retrieval-only`):
+
+| Chunking | Chunks | hit@1 | hit@3 |
+|---|---|---|---|
+| **CLAUSE** (default) | 30 | 77% | **100%** |
+| FIXED 500 chars | 13 | 77% | 92% (lost §4.8), and each chunk mixes 3–4 clauses |
+| FIXED 200 chars | 32 | 69% | 92% |
+
+**Answers** (16 questions: 13 with an expected §, plus out-of-scope, live-data and off-topic traps):
+
+| Prompt | Correct citation / correct refusal | Failure |
+|---|---|---|
+| `policy-qa-v1` | 15/16 (94%) | q07 "bounced EMI": right fact, but cited §2.4 (the *definition* of bounce) instead of §4.8 (the rule) |
+| `policy-qa-v2` | **16/16 (100%)** | v2 adds: cite the clause whose own text you rely on; definitions explain terms, rules set limits |
+
+Guard 2 could not catch q07: §2.4 *was* retrieved. It checks that a citation exists, not that it supports the claim.
+
+**Without RAG** (`#32`, POC 1 endpoint, same question) the model still answers "Fixed Operational Interest Rate ...
+typically 9% to 14%". With RAG: "50% for salaried (§4.2), 45% for self-employed (§4.3)".
+
+Similarity scores are compressed: correct clauses score ~0.70–0.83, but off-topic "cryptocurrency" still scores
+0.58 and only clearly unrelated text (a cricket poem, 0.46) falls under 0.5. **A threshold can't separate
+in-scope from out-of-scope on its own**, so the prompt's "say not covered" rule is the second layer.
+
+### Experiments
+
+1. **Chunking:** `#31` (FIXED 500), rerun the retrieval eval, compare, re-ingest with `#24`.
+2. **top-k:** `--top-k 1` vs `5`. q02/q07/q08 need k ≥ 2: the right clause is #2 or #3.
+3. **Paraphrase:** `#27`. "salary towards EMIs" ranks §3.3 first and §4.2 third.
+4. **nomic task prefixes** (`search_query:` / `search_document:`): measured outside the app. They moved §4.2 to #1
+   for the paraphrase, but cut the §4.2 vs §4.3 margin for "maximum FOIR" to 0.001 and raised every score
+   (cricket 0.52), so the threshold would need recalibrating. A trade-off, not a free win; not enabled.
+5. **No RAG:** `#32` asks POC 1 the same question. Compare with `#26`.
+6. **Live data:** `#29`. Rule 4: scores come from the bureau over MCP, never from documents.

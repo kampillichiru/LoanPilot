@@ -49,6 +49,12 @@
 			<artifactId>spring-ai-starter-mcp-client</artifactId>
 		</dependency>
 
+		<!-- POC 6: RAG. Vector store for policy clauses (Qdrant, gRPC :6334). Embeddings come from Ollama (nomic-embed-text). -->
+		<dependency>
+			<groupId>org.springframework.ai</groupId>
+			<artifactId>spring-ai-starter-vector-store-qdrant</artifactId>
+		</dependency>
+
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-validation-test</artifactId>

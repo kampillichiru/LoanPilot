@@ -22,7 +22,7 @@ See [docs/architecture.md](docs/architecture.md) for the full end-to-end design.
 | 3 | Tool calling (EMI calc, mock CIBIL) | Agent loop, `@Tool` | `loan-orchestrator` | ✅ done |
 | 4 | First MCP server | MCP server, transports | `mcp-credit-bureau` | ✅ done |
 | 5 | MCP client | Remote tool discovery | `loan-orchestrator` | ✅ done |
-| 6 | RAG over credit policy | Embeddings, chunking, Qdrant | `policy-docs` + orchestrator | ⬜ |
+| 6 | RAG over credit policy | Embeddings, chunking, Qdrant | `policy-docs` + orchestrator | ✅ done (16/16) |
 | 7 | Decision engine + agent workflow | LLM explains, code decides | `loan-orchestrator` | ⬜ |
 | 8 | Guardrails + evals | PII masking, audit, golden set | `evals` | ⬜ |
 

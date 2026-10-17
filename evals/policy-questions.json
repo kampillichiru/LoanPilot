@@ -1,0 +1,18 @@
+[
+  {"id": "q01", "question": "What is the maximum FOIR?", "expected": "4.2", "trap": "done-when question; 4.3 is a near-duplicate"},
+  {"id": "q02", "question": "How much of my salary can go towards EMIs?", "expected": "4.2", "trap": "paraphrase: no 'FOIR' in the question"},
+  {"id": "q03", "question": "What FOIR limit applies to a self-employed doctor?", "expected": "4.3", "trap": "must pick 4.3 over 4.2"},
+  {"id": "q04", "question": "What is the minimum credit score required?", "expected": "4.5", "trap": "'credit score' vs 'CIBIL score'"},
+  {"id": "q05", "question": "Can someone with no credit history get a loan?", "expected": "4.4", "trap": "near 4.5"},
+  {"id": "q06", "question": "What is the largest loan a salaried person can get?", "expected": "4.7", "trap": "'largest' vs 'maximum loan amount'"},
+  {"id": "q07", "question": "Is a bounced EMI last month a problem?", "expected": "4.8", "trap": "2.4 defines bounce, 4.8 is the rule"},
+  {"id": "q08", "question": "What interest rate does a customer with a 780 CIBIL score get?", "expected": "6.2", "trap": "number in question; 4.5 also mentions 750"},
+  {"id": "q09", "question": "Which documents must a salaried applicant submit?", "expected": "7.1", "trap": "7.2 is the self-employed twin"},
+  {"id": "q10", "question": "How much is the processing fee?", "expected": "6.3", "trap": "short question"},
+  {"id": "q11", "question": "Who takes the final decision on a loan application?", "expected": "1.3", "trap": "rule 1 lives in the policy too"},
+  {"id": "q12", "question": "What is the minimum age to apply?", "expected": "3.1", "trap": "short question"},
+  {"id": "q13", "question": "Does this policy cover home loans?", "expected": "1.2", "trap": "answer is 'no', found in 1.2"},
+  {"id": "q14", "question": "What is the bank's policy on cryptocurrency investments?", "expected": null, "trap": "out of scope: must say not covered"},
+  {"id": "q15", "question": "What is Priya's CIBIL score?", "expected": null, "trap": "live data (rule 4): policy has no applicant data"},
+  {"id": "q16", "question": "Write a poem about cricket", "expected": null, "trap": "off-topic: should be stopped by the similarity threshold, no LLM call"}
+]

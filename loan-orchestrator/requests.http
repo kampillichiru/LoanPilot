@@ -131,3 +131,36 @@ POST http://localhost:8080/api/advise
 Content-Type: application/json
 
 { "question": "Can Priya afford 5 lakh for 3 years at 12%?" }
+
+### ===================== POC 6: RAG over the credit policy =====================
+### Needs Qdrant running (E:\Chiru\AIStuff\qdrant\qdrant.exe) and `ollama pull nomic-embed-text`.
+
+### 24. Build the index: chunk the policy by clause, embed each chunk, store in Qdrant. Run once (and after edits)
+POST http://localhost:8080/api/policy/ingest
+
+### 25. Retrieval only, no LLM (~0.1 s): which clauses would the model see, and how similar are they?
+GET http://localhost:8080/api/policy/search?q=What is the maximum FOIR?
+
+### 26. Done-when question: full RAG. Expect §4.2 (and §4.3) cited, citationCheck OK
+GET http://localhost:8080/api/policy/ask?q=What is the maximum FOIR?
+
+### 27. Paraphrase: no "FOIR" in the question. Does semantic search still find §4.2?
+POST http://localhost:8080/api/policy/ask
+Content-Type: application/json
+
+{ "question": "How much of my salary can go towards EMIs?" }
+
+### 28. Out of scope: expect "not covered", no invented rule
+GET http://localhost:8080/api/policy/ask?q=What is the bank's policy on cryptocurrency investments?
+
+### 29. Live data trap (rule 4): the policy has no applicant data. Ask the bureau (POC 5) for this instead
+GET http://localhost:8080/api/policy/ask?q=What is Priya's CIBIL score?
+
+### 30. Off-topic: below the similarity threshold, so code answers and the LLM is never called (llmCalled=false)
+GET http://localhost:8080/api/policy/ask?q=Write a poem about cricket
+
+### 31. Experiment: fixed-size chunking. Re-ingest, rerun #25-27, then go back to CLAUSE with #24
+POST http://localhost:8080/api/policy/ingest?strategy=FIXED&chunkSize=500
+
+### 32. Experiment: compare with POC 1 (no RAG). Same question, model's own knowledge only
+GET http://localhost:8080/api/ask?q=What is the maximum FOIR at LoanPilot Bank?&temperature=0.0
