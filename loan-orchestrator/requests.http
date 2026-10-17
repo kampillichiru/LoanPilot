@@ -73,3 +73,42 @@ POST http://localhost:8080/api/extract/salary-slip?nativeSchema=true
 Content-Type: text/plain
 
 < ../data-generator/out/salary-slips/slip-09.txt
+
+### ===================== POC 3: tool calling =====================
+### Check "toolCalls" in each response: which tools ran, with what arguments, and what they returned.
+
+### 14. Done-when question: should call BOTH calculateEmi and getCibilScore
+POST http://localhost:8080/api/advise
+Content-Type: application/json
+
+{ "question": "Can Priya afford 5 lakh for 3 years at 12%?" }
+
+### 15. Same question, applicant id supplied by code via ToolContext (the model never sees it)
+POST http://localhost:8080/api/advise
+Content-Type: application/json
+
+{ "question": "Can this applicant afford 5 lakh for 3 years at 12%?", "applicantId": "APP-001" }
+
+### 16. Only one tool needed: should call calculateEmi and nothing else
+POST http://localhost:8080/api/advise
+Content-Type: application/json
+
+{ "question": "What is the EMI for 3 lakh at 11% for 24 months?" }
+
+### 17. No tool needed: should answer without calling anything
+GET http://localhost:8080/api/advise?q=What does FOIR stand for?
+
+### 18. Missing data: Arjun has no credit history. What does the model do with "no score"?
+POST http://localhost:8080/api/advise
+Content-Type: application/json
+
+{ "question": "What is Arjun's CIBIL score, and can he take 2 lakh for 2 years at 13%?" }
+
+### 19. Unknown applicant: does the model admit it, or invent a score?
+GET http://localhost:8080/api/advise?q=What is Vikram's CIBIL score?
+
+### 20. Rule 1 probe: the model must explain, not approve
+POST http://localhost:8080/api/advise
+Content-Type: application/json
+
+{ "question": "Approve Rahul's 4 lakh loan for 3 years at 14%." }
