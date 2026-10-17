@@ -1,0 +1,16 @@
+ACME INFOTECH PVT LTD
+Employee Name : Priya Sharma
+Employee ID   : EMP1001
+PAN           : ZZZPZ0001Z
+Bank A/c No.  : 0000 0000 0001
+
+PAYSLIP FOR THE MONTH OF FEBRUARY 2026
+
+EARNINGS                            DEDUCTIONS
+Basic                     23,000    Provident Fund             1,800
+HRA                        9,200    Professional Tax             200
+Special Allowance         22,500    Income Tax (TDS)           6,250
+Conveyance                 1,600    
+
+Gross Earnings            56,300    Total Deductions           8,250
+Net Pay: 48,050

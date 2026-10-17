@@ -1,6 +1,8 @@
-# loan-orchestrator: POC 1: Talk to a local LLM from Java
+# loan-orchestrator
 
-## What's here
+## POC 1: Talk to a local LLM from Java
+
+### What's here
 
 | File | Purpose |
 |------|---------|
@@ -12,7 +14,7 @@
 | `test/.../AskServiceTest.java` | Unit test with a fake model (no Ollama needed) |
 | `requests.http` | Ready-made requests and experiments |
 
-## Request flow
+### Request flow
 
 ```
 curl / browser ──▶ AskController ──▶ AskService ──▶ ChatClient (Spring AI)
@@ -24,7 +26,7 @@ curl / browser ──▶ AskController ──▶ AskService ──▶ ChatClient
    JSON { answer, model, promptVersion, tokens, latencyMs } ◀──┘
 ```
 
-## Run it
+### Run it
 
 1. Install Ollama: https://ollama.com/download, then in a new terminal:
    ```
@@ -46,7 +48,7 @@ curl / browser ──▶ AskController ──▶ AskService ──▶ ChatClient
    ```
    Or open `requests.http` in IntelliJ and run the experiments.
 
-## Experiments (this is where the learning is)
+### Experiments (this is where the learning is)
 
 1. **Temperature:** run request #3 three times, then #4 three times. What changes?
 2. **System prompt:** compare #5 and #6. What does the system prompt actually do?
@@ -61,3 +63,58 @@ curl / browser ──▶ AskController ──▶ AskService ──▶ ChatClient
    `loanpilot.prompt.system` / `loanpilot.prompt.version`, and compare answers.
 
 Write what you found in `../LEARNINGS.md`.
+
+---
+
+## POC 2: Structured extraction
+
+Salary-slip text → `SalarySlip` record → Bean Validation. The LLM is a **parser** here: its output
+feeds later rules (FOIR, max loan), so it must fail loudly, never silently.
+
+### What's here
+
+| File | Purpose | Who writes it |
+|------|---------|---------------|
+| `extract/SalarySlip.java` | The record the model must fill. Its fields become the JSON schema | **you** (stub now) |
+| `resources/prompts/extract-salary-slip-v1.st` | Extraction instructions (system prompt) | **you** (TODO now) |
+| `extract/ExtractService.java` | Builds prompt + schema, calls Ollama, parses, validates, keeps raw output | scaffold |
+| `extract/ExtractController.java` | `POST /api/extract/salary-slip` (JSON or text/plain). 200 valid, 422 not | scaffold |
+| `test/.../ExtractServiceTest.java` | Plumbing tests with a fake model | scaffold |
+| `../data-generator/salary_slips.py` | 10 synthetic slips + `expected.json` answer key | scaffold |
+| `../evals/run_salary_slip_extraction.py` | Scores every slip, field by field | scaffold |
+
+### Request flow
+
+```
+slip text ──▶ ExtractService
+                │ system: extract-salary-slip-v1.st
+                │ user:   slip text + JSON schema (generated from SalarySlip)
+                │ options: temperature 0, seed 42, [format = schema if nativeSchema]
+                ▼
+              Ollama ──▶ raw text ──▶ BeanOutputConverter ──▶ SalarySlip ──▶ Validator
+                                          │ parse fails                         │ violations
+                                          ▼                                     ▼
+                              422 + rawOutput + errors          422 + slip + errors     else 200
+```
+
+### Your tasks
+
+1. **Design `SalarySlip`.** Match the answer-key names (`employeeName`, `employerName`, `payPeriod`,
+   `grossEarnings`, `totalDeductions`, `netPay`). Choose types (Long vs BigDecimal, String vs YearMonth)
+   and add validation, including a cross-field `@AssertTrue` (gross − deductions = net).
+2. **Write `extract-salary-slip-v1.st`.** No `{ }` in it: the schema is appended by code.
+3. Run `mvnw.cmd test` and fix `ExtractServiceTest` for your new record (it uses the stub's two fields).
+4. Start the app, then `python ../evals/run_salary_slip_extraction.py`. Goal: 10/10.
+5. **Find one failure and fix it** (roadmap "done when"). Copy the prompt to `-v2.st` rather than editing
+   v1, so each eval result maps to one prompt version.
+
+### Experiments
+
+1. **Schema in prompt vs native:** run the eval with and without `--native-schema`. Which failures
+   disappear? Which don't? (A schema guarantees *shape*, not *correct values*.)
+2. **Field descriptions:** add `@JsonPropertyDescription` to a field and look at the schema in the
+   prompt. Does slip-10 (YTD column) improve?
+3. **Validation as a safety net:** remove the `@AssertTrue` and rerun. Which wrong extractions now
+   come back as 200 "valid"?
+4. **Arithmetic:** slip-09 has no Total Deductions line. Should the model add it up, or should Java
+   compute it? (Hint: rule 1.)

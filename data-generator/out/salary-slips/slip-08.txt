@@ -1,0 +1,15 @@
+SKYLINE CONSTRUCTIONS PVT LTD
+Employee Name : Rohit Gupta
+Employee ID   : EMP1008
+PAN           : ZZZPZ0008Z
+Bank A/c No.  : 0000 0000 0008
+Pay slip for March 2026
+
+Basic                  47,500.00    Provident Fund          1,800.00
+HRA                    19,000.00    Professional Tax          200.00
+Special Allowance      26,500.50    Income Tax (TDS)        2,600.25
+Conveyance              1,600.00    
+
+Gross Earnings: 94,600.50
+Total Deductions: 4,600.25
+Net Pay: 90,000.25

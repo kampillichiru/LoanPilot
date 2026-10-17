@@ -53,3 +53,23 @@ POST http://localhost:8080/api/ask
 Content-Type: application/json
 
 { "question": "" }
+
+### ===================== POC 2: salary-slip extraction =====================
+
+### 11. Extract a slip (JSON body). 200 = valid, 422 = parsed-but-invalid or unparseable (read rawOutput)
+POST http://localhost:8080/api/extract/salary-slip
+Content-Type: application/json
+
+{ "text": "ACME INFOTECH PVT LTD\nEmployee Name : Priya Sharma\nPAN : ZZZPZ0001Z\nPAYSLIP FOR THE MONTH OF FEBRUARY 2026\nBasic 23,000   Provident Fund 1,800\nHRA 9,200   Professional Tax 200\nSpecial Allowance 22,500   Income Tax (TDS) 6,250\nConveyance 1,600\nGross Earnings 56,300   Total Deductions 8,250\nNet Pay: 48,050" }
+
+### 12. Same, but send a generated slip file as plain text
+POST http://localhost:8080/api/extract/salary-slip
+Content-Type: text/plain
+
+< ../data-generator/out/salary-slips/slip-09.txt
+
+### 13. Experiment: Ollama native JSON schema (format) vs schema-in-prompt only. Compare with #12
+POST http://localhost:8080/api/extract/salary-slip?nativeSchema=true
+Content-Type: text/plain
+
+< ../data-generator/out/salary-slips/slip-09.txt

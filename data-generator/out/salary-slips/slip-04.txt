@@ -1,0 +1,13 @@
+NORTHSTAR ANALYTICS LLP
+Employee Name : Vikram Reddy
+Employee ID   : EMP1004
+PAN           : ZZZPZ0004Z
+Bank A/c No.  : 0000 0000 0004
+Payslip: Feb'26
+
+Basic                     47,500    Provident Fund             1,800
+HRA                       19,000    Professional Tax             200
+Special Allowance         19,750    Income Tax (TDS)          12,900
+Conveyance                 1,600    
+
+Gross: 87,850   Deductions: 14,900   Net: 72,950

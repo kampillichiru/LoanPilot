@@ -1,0 +1,17 @@
+BLUEWAVE LOGISTICS LTD
+Employee Name : Rahul Verma
+Employee ID   : EMP1002
+PAN           : ZZZPZ0002Z
+Bank A/c No.  : 0000 0000 0002
+Pay Period: April 2026
+
+Basic: 37,500
+HRA: 15,000
+Special Allowance: 11,500
+Conveyance: 1,600
+Provident Fund: 1,800
+Professional Tax: 200
+Income Tax (TDS): 13,950
+Gross Salary: 65,600
+Total Deductions: 15,950
+Net Salary: 49,650

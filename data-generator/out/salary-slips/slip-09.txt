@@ -1,0 +1,14 @@
+LOTUS RETAIL LTD
+Employee Name : Meera Joshi
+Employee ID   : EMP1009
+PAN           : ZZZPZ0009Z
+Bank A/c No.  : 0000 0000 0009
+Payslip - February 2026
+
+Basic                     68,500    Provident Fund             1,800
+HRA                       27,400    Professional Tax             200
+Special Allowance         11,000    Income Tax (TDS)           9,150
+Conveyance                 1,600    
+
+Gross Earnings: 1,08,500
+Net Pay: 97,350

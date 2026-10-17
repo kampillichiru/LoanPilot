@@ -1,0 +1,16 @@
+RIVERBEND PHARMA LTD
+|Emp Name|Kavya Menon|
+|PAN| ZZZPZ0007Z |
+|Month| March
+2026 |
+| Basic |  74,000 |
+| HRA |  29,600 |
+| Special Allowance |  26,750 |
+| Conveyance |  1,600 |
+| Provident Fund |  1,800 |
+| Professional Tax |  200 |
+| Income Tax (TDS) |  7,100 |
+| Gross   Earnings | 1,31,950 |
+| Total  Deductions| 9,100 |
+| Net
+Pay | 1,22,850 |

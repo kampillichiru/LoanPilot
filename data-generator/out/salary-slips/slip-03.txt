@@ -1,0 +1,14 @@
+GREENLEAF FOODS PVT LTD
+Employee Name : Ananya Iyer
+Employee ID   : EMP1003
+PAN           : ZZZPZ0003Z
+Bank A/c No.  : 0000 0000 0003
+Salary Statement - February 2026
+
+Basic                     74,000    Provident Fund             1,800
+HRA                       29,600    Professional Tax             200
+Special Allowance          7,000    Income Tax (TDS)             750
+Conveyance                 1,600    
+
+Total Earnings 1,12,200 | Total Deductions 2,750
+Take Home: 1,09,450

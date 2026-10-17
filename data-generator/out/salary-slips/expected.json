@@ -1,0 +1,92 @@
+{
+  "slip-01.txt": {
+    "trap": "none: classic two-column layout (baseline)",
+    "employeeName": "Priya Sharma",
+    "employerName": "Acme Infotech Pvt Ltd",
+    "payPeriod": "2026-02",
+    "grossEarnings": 56300,
+    "totalDeductions": 8250,
+    "netPay": 48050
+  },
+  "slip-02.txt": {
+    "trap": "key: value list, no table",
+    "employeeName": "Rahul Verma",
+    "employerName": "Bluewave Logistics Ltd",
+    "payPeriod": "2026-04",
+    "grossEarnings": 65600,
+    "totalDeductions": 15950,
+    "netPay": 49650
+  },
+  "slip-03.txt": {
+    "trap": "net pay labelled 'Take Home'",
+    "employeeName": "Ananya Iyer",
+    "employerName": "Greenleaf Foods Pvt Ltd",
+    "payPeriod": "2026-02",
+    "grossEarnings": 112200,
+    "totalDeductions": 2750,
+    "netPay": 109450
+  },
+  "slip-04.txt": {
+    "trap": "month written as Mar'26",
+    "employeeName": "Vikram Reddy",
+    "employerName": "Northstar Analytics LLP",
+    "payPeriod": "2026-02",
+    "grossEarnings": 87850,
+    "totalDeductions": 14900,
+    "netPay": 72950
+  },
+  "slip-05.txt": {
+    "trap": "Rs. prefix everywhere, net pay also in words",
+    "employeeName": "Sneha Kulkarni",
+    "employerName": "Sunrise Textiles Ltd",
+    "payPeriod": "2026-01",
+    "grossEarnings": 104350,
+    "totalDeductions": 12700,
+    "netPay": 91650
+  },
+  "slip-06.txt": {
+    "trap": "bilingual Hindi-English labels",
+    "employeeName": "Arjun Nair",
+    "employerName": "Pinecone Software Pvt Ltd",
+    "payPeriod": "2026-04",
+    "grossEarnings": 132150,
+    "totalDeductions": 2150,
+    "netPay": 130000
+  },
+  "slip-07.txt": {
+    "trap": "OCR-style noise: pipes, broken spacing, stray line breaks",
+    "employeeName": "Kavya Menon",
+    "employerName": "Riverbend Pharma Ltd",
+    "payPeriod": "2026-03",
+    "grossEarnings": 131950,
+    "totalDeductions": 9100,
+    "netPay": 122850
+  },
+  "slip-08.txt": {
+    "trap": "amounts with paise (decimals)",
+    "employeeName": "Rohit Gupta",
+    "employerName": "Skyline Constructions Pvt Ltd",
+    "payPeriod": "2026-03",
+    "grossEarnings": 94600.5,
+    "totalDeductions": 4600.25,
+    "netPay": 90000.25
+  },
+  "slip-09.txt": {
+    "trap": "no 'Total Deductions' line: the model must add the deductions itself",
+    "employeeName": "Meera Joshi",
+    "employerName": "Lotus Retail Ltd",
+    "payPeriod": "2026-02",
+    "grossEarnings": 108500,
+    "totalDeductions": 11150,
+    "netPay": 97350
+  },
+  "slip-10.txt": {
+    "trap": "year-to-date (YTD) column next to the monthly figures",
+    "employeeName": "Karthik Rao",
+    "employerName": "Quantum Fintech Pvt Ltd",
+    "payPeriod": "2026-06",
+    "grossEarnings": 84250,
+    "totalDeductions": 13750,
+    "netPay": 70500
+  }
+}

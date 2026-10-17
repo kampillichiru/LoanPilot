@@ -1,0 +1,16 @@
+SUNRISE TEXTILES LTD
+Employee Name : Sneha Kulkarni
+Employee ID   : EMP1005
+PAN           : ZZZPZ0005Z
+Bank A/c No.  : 0000 0000 0005
+Month: January 2026
+
+Basic                 Rs. 45,000    Provident Fund         Rs. 1,800
+HRA                   Rs. 18,000    Professional Tax         Rs. 200
+Special Allowance     Rs. 39,750    Income Tax (TDS)      Rs. 10,700
+Conveyance             Rs. 1,600    
+
+Gross Earnings: Rs. 1,04,350
+Total Deductions: Rs. 12,700
+Net Pay: Rs. 91,650
+(Rupees Ninety One Thousand Six Hundred Fifty Only)

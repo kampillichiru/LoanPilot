@@ -21,3 +21,6 @@ application-local.properties
 
 # OS
 Thumbs.db
+
+# Eval run outputs (contain raw model output)
+evals/results/
