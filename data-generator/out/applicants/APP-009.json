@@ -1,0 +1,12 @@
+{
+  "applicantId": "APP-009",
+  "employmentType": "SALARIED",
+  "amount": 400000,
+  "tenureMonths": 36,
+  "purpose": "Wedding",
+  "salarySlips": [
+    "LOTUS RETAIL LTD\nEmployee Name : Meera Joshi\nEmployee ID   : EMP1009\nPAN           : ZZZPZ0009Z\nBank A/c No.  : 0000 0000 0009\n\nPAYSLIP FOR THE MONTH OF JULY 2026\n\nEARNINGS                            DEDUCTIONS\nBasic                     28,900    Provident Fund             1,800\nHRA                       11,600    Professional Tax             200\nConveyance                 1,600    Income Tax (TDS)           5,200\nSpecial Allowance         30,100    \n\nGross Earnings            72,200    Total Deductions           7,200\nNet Pay: 65,000\n",
+    "LOTUS RETAIL LTD\nEmployee Name : Meera Joshi\nEmployee ID   : EMP1009\nPAN           : ZZZPZ0009Z\nBank A/c No.  : 0000 0000 0009\n\nPAYSLIP FOR THE MONTH OF AUGUST 2026\n\nEARNINGS                            DEDUCTIONS\nBasic                     28,900    Provident Fund             1,800\nHRA                       11,600    Professional Tax             200\nConveyance                 1,600    Income Tax (TDS)           5,200\nSpecial Allowance         30,100    \n\nGross Earnings            72,200    Total Deductions           7,200\nNet Pay: 65,000\n",
+    "LOTUS RETAIL LTD\nEmployee Name : Meera Joshi\nEmployee ID   : EMP1009\nPAN           : ZZZPZ0009Z\nBank A/c No.  : 0000 0000 0009\n\nPAYSLIP FOR THE MONTH OF SEPTEMBER 2026\n\nEARNINGS                            DEDUCTIONS\nBasic                     28,900    Provident Fund             1,800\nHRA                       11,600    Professional Tax             200\nConveyance                 1,600    Income Tax (TDS)           5,200\nSpecial Allowance         30,100    \n\nGross Earnings            72,200    Total Deductions           7,200\nNet Pay: 65,000\n"
+  ]
+}

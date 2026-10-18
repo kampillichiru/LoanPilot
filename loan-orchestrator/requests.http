@@ -207,3 +207,33 @@ Content-Type: application/json
 
 { "applicantId": "APP-001", "employmentType": "SALARIED", "amount": 500000, "tenureMonths": 36,
   "declaredNetMonthlyIncome": 72600 }
+
+### ---------------------------------------------------------------------------------------------------------
+### POC 8: guardrails + evals. Every LLM call is masked and audited by LlmGuardAdvisor.
+### ---------------------------------------------------------------------------------------------------------
+
+### 39. Masking in action: this slip has a PAN, a bank account and a phone. The model sees [PAN] [ACCOUNT_NUMBER] [PHONE]
+POST http://localhost:8080/api/extract/salary-slip
+Content-Type: application/json
+
+{ "text": "ACME INFOTECH PVT LTD\nEmployee Name : Priya Sharma\nPAN : ZZZPZ0001Z\nBank A/c No. : 0000 0000 0001\nMobile : 9876543210\nPAYSLIP FOR THE MONTH OF JULY 2026\nBasic 37,100  HRA 14,800  Conveyance 1,600  Special Allowance 39,220\nGross Earnings 92,720\nProvident Fund 1,800  Professional Tax 200  Income Tax (TDS) 6,720\nTotal Deductions 8,720\nNet Pay: 84,000" }
+
+### 40. The audit log: the latest LLM calls (purpose, model, prompt version, input hash, PII counts, output)
+GET http://localhost:8080/api/audit?limit=5
+
+### 41. One application's calls: use the applicationId from a POST /api/applications response
+GET http://localhost:8080/api/audit?requestId=REPLACE_WITH_APPLICATION_ID
+
+### 42. The boundary: FOIR exactly 50.000% -> APPROVE (limit is <= 50%). Compare with APP-007: 50.002% -> REJECT
+POST http://localhost:8080/api/applications
+Content-Type: application/json
+
+{ "applicantId": "APP-006", "employmentType": "SALARIED", "amount": 500000, "tenureMonths": 36,
+  "declaredNetMonthlyIncome": 60000 }
+
+### 43. Self-employed: FOIR 46.5% fails the 45% limit (§4.3), though it would pass the salaried 50%
+POST http://localhost:8080/api/applications
+Content-Type: application/json
+
+< ../data-generator/out/applicants/APP-018.json
+

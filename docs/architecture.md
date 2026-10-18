@@ -8,7 +8,7 @@ Two views:
 
 ### System map
 
-Colours: amber = LLM call, violet = embeddings / vector DB / RAG, teal = plain Java or MCP, dashed = POC 8 (in progress).
+Colours: amber = LLM call, violet = embeddings / vector DB / RAG, teal = plain Java or MCP, dashed = the POC 8 guard.
 
 ```mermaid
 flowchart LR
@@ -28,7 +28,8 @@ flowchart LR
       direction LR
       s1["1 Bureau<br/>code"] --> s2["2 Slips<br/>LLM"] --> s3["3 Decide<br/>DecisionEngine"] --> s4["4 § lookup<br/>PolicyLibrary"] --> s5["5 Memo<br/>LLM, code checks"]
     end
-    guard["POC 8 guard<br/>mask PII · audit log<br/>in progress"]
+    guard["POC 8 guard · LlmGuardAdvisor<br/>mask PII · audit every call"]
+    auditlog[("audit/llm-calls.jsonl<br/>append-only")]
   end
 
   subgraph ext["Separate processes and files"]
@@ -45,11 +46,13 @@ flowchart LR
   datagen -- test files --> evals
   ask -- LLM --> guard
   extract -- LLM --> guard
-  rag -- "embed + answer" --> guard
+  rag -- "answer" --> guard
+  rag -- "embed question (not guarded)" --> ollama
   advise -- LLM --> guard
   s2 -- LLM --> guard
   s5 -- LLM --> guard
-  guard -- "chat / embed" --> ollama
+  guard -- "masked prompt" --> ollama
+  guard -- "one record per call" --> auditlog
   rag -- "store vectors · top-3 search" --> qdrant
   docs -- "chunk by clause" --> rag
   s4 -- "read § by number" --> docs
@@ -65,10 +68,11 @@ flowchart LR
   class rag,qdrant rag
   class s1,s3,s4,bureau code
   class guard planned
+  class auditlog code
 ```
 
 How to read it:
-- **Every LLM call** (Ask, Extract, Advise, the RAG answer, slip reading, memo) goes to Ollama, through the POC 8 guard once it's built.
+- **Every LLM chat call** (Ask, Extract, Advise, the RAG answer, slip reading, memo) goes through the POC 8 guard: PII is masked first, then one audit record is written per call (ADR-0004). Embedding calls don't use `ChatClient`, so they bypass it (a known gap).
 - **Only Policy RAG** uses embeddings and the **vector database**. Nothing else needs to search by meaning.
 - **The bureau is reached two ways over MCP:** the Advise agent calls it because the LLM chose to; the workflow calls it because the code always does. Claude Code uses the same tool directly (POC 4).
 - **The workflow does not use RAG.** It already knows the rule is §4.2, so it reads §4.2 from the file (lookup, not search).
@@ -142,7 +146,7 @@ sequenceDiagram
 | 5 | MCP client | picks tools | – | – | – | client | – |
 | 6 | RAG over policy | answer | nomic | Qdrant | yes | – | § check |
 | 7 | Decision + workflow | slips, memo | – | – | no (lookup) | client | **the decision** |
-| 8 | Guardrails + evals *(in progress)* | guarded | – | – | – | – | mask, audit, score |
+| 8 | Guardrails + evals | masked + audited | – | – | – | – | masking, audit, faithfulness check |
 
 ### Why each component
 
@@ -156,7 +160,8 @@ sequenceDiagram
 | DecisionEngine (plain Java) | 7 | Same answer every time, unit-tested, explainable rule by rule (ADR-0001) | Limits move to a versioned policy config |
 | Workflow, not agent | 7 | Every application needs the same facts in the same order (ADR-0003) | New steps need code changes |
 | Python (data-generator, evals) | 2+ | Fast scripts outside the product; all data synthetic | Evals run in CI on every prompt change |
-| PII guard + audit log | 8 | Mask PAN, Aadhaar, accounts before any LLM call; record every call | In progress |
+| PII guard + audit log (`LlmGuardAdvisor`) | 8 | One advisor on every `ChatClient`: mask before, audit after; can't be forgotten (ADR-0004) | Embeddings not guarded yet; JSONL file becomes a DB table |
+| Memo faithfulness check (code) | 8 | Every memo number must come from its input; key figures, disclosures, no overclaim | Can't judge tone or a right number with the wrong label |
 
 ### Where AI is deliberately not used
 - **Maths** (EMI, FOIR, totals, averages): Java. The LLM once "added" deductions to 19,700 instead of 11,150.

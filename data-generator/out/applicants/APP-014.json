@@ -1,0 +1,12 @@
+{
+  "applicantId": "APP-014",
+  "employmentType": "SALARIED",
+  "amount": 200000,
+  "tenureMonths": 24,
+  "purpose": "Medical expenses",
+  "salarySlips": [
+    "NORTHSTAR ANALYTICS LLP\nEmployee Name : Lakshmi Das\nEmployee ID   : EMP1014\nPAN           : ZZZPZ0014Z\nBank A/c No.  : 0000 0000 0014\n\nPAYSLIP FOR THE MONTH OF JULY 2026\n\nEARNINGS                            DEDUCTIONS\nBasic                     20,200    Provident Fund             1,800\nHRA                        8,100    Professional Tax             200\nConveyance                 1,600    Income Tax (TDS)           3,600\nSpecial Allowance         20,700    \n\nGross Earnings            50,600    Total Deductions           5,600\nNet Pay: 45,000\n",
+    "NORTHSTAR ANALYTICS LLP\nEmployee Name : Lakshmi Das\nEmployee ID   : EMP1014\nPAN           : ZZZPZ0014Z\nBank A/c No.  : 0000 0000 0014\n\nPAYSLIP FOR THE MONTH OF AUGUST 2026\n\nEARNINGS                            DEDUCTIONS\nBasic                     20,200    Provident Fund             1,800\nHRA                        8,100    Professional Tax             200\nConveyance                 1,600    Income Tax (TDS)           3,600\nSpecial Allowance         20,700    \n\nGross Earnings            50,600    Total Deductions           5,600\nNet Pay: 45,000\n",
+    "NORTHSTAR ANALYTICS LLP\nEmployee Name : Lakshmi Das\nEmployee ID   : EMP1014\nPAN           : ZZZPZ0014Z\nBank A/c No.  : 0000 0000 0014\n\nPAYSLIP FOR THE MONTH OF SEPTEMBER 2026\n\nEARNINGS                            DEDUCTIONS\nBasic                     20,200    Provident Fund             1,800\nHRA                        8,100    Professional Tax             200\nConveyance                 1,600    Income Tax (TDS)           3,600\nSpecial Allowance         20,700    \n\nGross Earnings            50,600    Total Deductions           5,600\nNet Pay: 45,000\n"
+  ]
+}

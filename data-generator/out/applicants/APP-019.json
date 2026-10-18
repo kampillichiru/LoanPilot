@@ -1,0 +1,12 @@
+{
+  "applicantId": "APP-019",
+  "employmentType": "SALARIED",
+  "amount": 300000,
+  "tenureMonths": 36,
+  "purpose": "Wedding",
+  "salarySlips": [
+    "SKYLINE CONSTRUCTIONS PVT LTD\nEmployee Name : Divya Menon\nEmployee ID   : EMP1019\nPAN           : ZZZPZ0019Z\nBank A/c No.  : 0000 0000 0019\n\nPAYSLIP FOR THE MONTH OF JULY 2026\n\nEARNINGS                            DEDUCTIONS\nBasic                     31,000    Provident Fund             1,800\nHRA                       12,400    Professional Tax             200\nConveyance                 1,600    Income Tax (TDS)           5,600\nSpecial Allowance         32,600    \n\nGross Earnings            77,600    Total Deductions           7,600\nNet Pay: 70,000\n",
+    "SKYLINE CONSTRUCTIONS PVT LTD\nEmployee Name : Divya Menon\nEmployee ID   : EMP1019\nPAN           : ZZZPZ0019Z\nBank A/c No.  : 0000 0000 0019\n\nPAYSLIP FOR THE MONTH OF AUGUST 2026\n\nEARNINGS                            DEDUCTIONS\nBasic                     31,000    Provident Fund             1,800\nHRA                       12,400    Professional Tax             200\nConveyance                 1,600    Income Tax (TDS)           5,600\nSpecial Allowance         32,600    \n\nGross Earnings            77,600    Total Deductions           7,600\nNet Pay: 70,000\n",
+    "SKYLINE CONSTRUCTIONS PVT LTD\nEmployee Name : Divya Menon\nEmployee ID   : EMP1019\nPAN           : ZZZPZ0019Z\nBank A/c No.  : 0000 0000 0019\n\nPAYSLIP FOR THE MONTH OF SEPTEMBER 2026\n\nEARNINGS                            DEDUCTIONS\nBasic                     31,000    Provident Fund             1,800\nHRA                       12,400    Professional Tax             200\nConveyance                 1,600    Income Tax (TDS)           5,600\nSpecial Allowance         32,600    \n\nGross Earnings            77,600    Total Deductions           7,600\nNet Pay: 70,000\n"
+  ]
+}

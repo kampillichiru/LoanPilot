@@ -24,3 +24,6 @@ Thumbs.db
 
 # Eval run outputs (contain raw model output)
 evals/results/
+
+# LLM audit log (contains model outputs)
+loan-orchestrator/audit/

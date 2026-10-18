@@ -1,0 +1,12 @@
+{
+  "applicantId": "APP-010",
+  "employmentType": "SALARIED",
+  "amount": 400000,
+  "tenureMonths": 36,
+  "purpose": "Travel",
+  "salarySlips": [
+    "QUANTUM FINTECH PVT LTD\nEmployee Name : Karthik Rao\nEmployee ID   : EMP1010\nPAN           : ZZZPZ0010Z\nBank A/c No.  : 0000 0000 0010\n\nPAYSLIP FOR THE MONTH OF JULY 2026\n\nEARNINGS                            DEDUCTIONS\nBasic                     28,700    Provident Fund             1,800\nHRA                       11,500    Professional Tax             200\nConveyance                 1,600    Income Tax (TDS)           5,160\nSpecial Allowance         29,860    \n\nGross Earnings            71,660    Total Deductions           7,160\nNet Pay: 64,500\n",
+    "QUANTUM FINTECH PVT LTD\nEmployee Name : Karthik Rao\nEmployee ID   : EMP1010\nPAN           : ZZZPZ0010Z\nBank A/c No.  : 0000 0000 0010\n\nPAYSLIP FOR THE MONTH OF AUGUST 2026\n\nEARNINGS                            DEDUCTIONS\nBasic                     28,900    Provident Fund             1,800\nHRA                       11,600    Professional Tax             200\nConveyance                 1,600    Income Tax (TDS)           5,200\nSpecial Allowance         30,100    \n\nGross Earnings            72,200    Total Deductions           7,200\nNet Pay: 65,000\n",
+    "QUANTUM FINTECH PVT LTD\nEmployee Name : Karthik Rao\nEmployee ID   : EMP1010\nPAN           : ZZZPZ0010Z\nBank A/c No.  : 0000 0000 0010\n\nPAYSLIP FOR THE MONTH OF SEPTEMBER 2026\n\nEARNINGS                            DEDUCTIONS\nBasic                     29,100    Provident Fund             1,800\nHRA                       11,600    Professional Tax             200\nConveyance                 1,600    Income Tax (TDS)           5,240\nSpecial Allowance         30,440    \n\nGross Earnings            72,740    Total Deductions           7,240\nNet Pay: 65,500\n"
+  ]
+}

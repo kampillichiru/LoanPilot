@@ -9,10 +9,14 @@ import java.util.ArrayList;
 import java.util.Deque;
 import java.util.List;
 
+import com.loanpilot.orchestrator.audit.InMemoryAuditLog;
 import com.loanpilot.orchestrator.decision.ApplicantFacts.EmploymentType;
 import com.loanpilot.orchestrator.decision.Decision.Outcome;
 import com.loanpilot.orchestrator.decision.DecisionEngine;
 import com.loanpilot.orchestrator.extract.ExtractService;
+import com.loanpilot.orchestrator.guard.LlmGuardAdvisor;
+import com.loanpilot.orchestrator.privacy.PiiMasker;
+import com.loanpilot.orchestrator.privacy.PiiType;
 import com.loanpilot.orchestrator.policy.PolicyChunker;
 import com.loanpilot.orchestrator.policy.PolicyLibrary;
 import jakarta.validation.Validation;
@@ -77,12 +81,14 @@ class ApplicationServiceTest {
         int extractionCalls;
         int memoCalls;
         Prompt lastMemoPrompt;
+        final List<String> extractionInputs = new ArrayList<>();
 
         @Override
         public ChatResponse call(Prompt prompt) {
             String reply;
             if (prompt.getSystemMessage().getText().startsWith("Extract")) {
                 extractionCalls++;
+                extractionInputs.add(prompt.getUserMessage().getText());
                 reply = slipReplies.removeFirst();
             } else {
                 memoCalls++;
@@ -110,14 +116,24 @@ class ApplicationServiceTest {
     private final FakeBureauTool bureauTool = new FakeBureauTool();
     private final FakeChatModel chat = new FakeChatModel();
     private final JsonMapper json = JsonMapper.builder().build();
-    private final ApplicationService service = new ApplicationService(
-            new BureauClient(List.of(() -> new ToolCallback[] { bureauTool }), json),
-            new ExtractService(ChatClient.builder(chat), Validation.buildDefaultValidatorFactory().getValidator(),
-                    new ByteArrayResource("Extract the salary slip.".getBytes()), "extract-test", "qwen2.5:7b", 0.0, 42),
-            new DecisionEngine(),
-            new PolicyLibrary(new FileSystemResource("../policy-docs/credit-policy-v1.md"), new PolicyChunker()),
-            ChatClient.builder(chat),
-            new ByteArrayResource("You write credit memos.".getBytes()), "credit-memo-test", "qwen2.5:7b", 0.0, 42);
+    private final InMemoryAuditLog audit = new InMemoryAuditLog();
+    private final ApplicationService service = service(false);
+
+    /** guarded = every ChatClient gets the POC 8 guard, as GuardConfig does in the running app. */
+    private ApplicationService service(boolean guarded) {
+        LlmGuardAdvisor guard = new LlmGuardAdvisor(new PiiMasker(), audit, "qwen2.5:7b");
+        java.util.function.Supplier<ChatClient.Builder> builder =
+                () -> guarded ? ChatClient.builder(chat).defaultAdvisors(guard) : ChatClient.builder(chat);
+        return new ApplicationService(
+                new BureauClient(List.of(() -> new ToolCallback[] { bureauTool }), json),
+                new ExtractService(builder.get(), Validation.buildDefaultValidatorFactory().getValidator(),
+                        new ByteArrayResource("Extract the salary slip.".getBytes()), "extract-test", "qwen2.5:7b", 0.0, 42),
+                new DecisionEngine(),
+                new PolicyLibrary(new FileSystemResource("../policy-docs/credit-policy-v1.md"), new PolicyChunker()),
+                audit,
+                builder.get(),
+                new ByteArrayResource("You write credit memos.".getBytes()), "credit-memo-test", "qwen2.5:7b", 0.0, 42);
+    }
 
     private static LoanApplicationRequest priya(List<String> slips) {
         return new LoanApplicationRequest("APP-001", EmploymentType.SALARIED, new BigDecimal("500000"), 36,
@@ -159,6 +175,8 @@ class ApplicationServiceTest {
                 .contains("[§1.3]")                       // decision authority clause, looked up by section
                 .doesNotContain("[§4.2]")                 // passed: no clause text, the engine's reason is enough
                 .contains("NOT_CHECKED §3.1")             // the officer is told what wasn't verified
+                // the conclusion sentence is chosen by code, not by the model
+                .contains("Summary opening: The checks the engine could run passed; the items under Not verified")
                 .doesNotContain("Priya")                  // data minimisation: id only
                 .doesNotContain("ZZZPZ");
     }
@@ -265,5 +283,24 @@ class ApplicationServiceTest {
 
         assertThat(report.cibilScore()).isEqualTo(762);
         assertThat(report.totalExistingEmi()).isEqualByComparingTo("20000");
+    }
+
+    @Test
+    void withTheGuardTheModelNeverSeesThePanAndEveryCallIsAuditedUnderTheApplicationId() {
+        chat.slipReplies.addAll(List.of(slipJson("2026-07", 84000), slipJson("2026-08", 85000), slipJson("2026-09", 86000)));
+        List<String> slips = List.of("2026-07", "2026-08", "2026-09").stream()
+                .map(m -> "PAN : ZZZPZ0001Z\nBank A/c No. : 0000 0000 0001\nPay period " + m + "\nNet Pay: 85,000")
+                .toList();
+
+        ApplicationResult r = service(true).process(priya(slips));
+
+        assertThat(chat.extractionInputs).hasSize(3).allSatisfy(text -> assertThat(text)
+                .doesNotContain("ZZZPZ0001Z", "0000 0000 0001").contains("[PAN]", "[ACCOUNT_NUMBER]", "Net Pay: 85,000"));
+        assertThat(r.llmCalls()).extracting(ApplicationResult.LlmCall::purpose)
+                .containsExactly("slip-extraction", "slip-extraction", "slip-extraction", "credit-memo");
+        assertThat(r.llmCalls().get(0).piiMasked()).containsEntry(PiiType.PAN, 1).containsEntry(PiiType.ACCOUNT_NUMBER, 1);
+        assertThat(r.llmCalls().get(3).piiMasked()).isEmpty();   // the memo input never had PII
+        assertThat(r.llmCalls().get(3).promptVersion()).isEqualTo("credit-memo-test");
+        assertThat(audit.find(r.applicationId())).hasSize(4);
     }
 }

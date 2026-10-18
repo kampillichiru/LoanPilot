@@ -2,8 +2,10 @@ package com.loanpilot.orchestrator.ask;
 
 import java.util.UUID;
 
+import com.loanpilot.orchestrator.guard.LlmGuardAdvisor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.SimpleLoggerAdvisor;
 import org.springframework.ai.chat.metadata.Usage;
@@ -55,7 +57,9 @@ public class AskService {
 
         ChatClient.ChatClientRequestSpec spec = chatClient.prompt()
                 .options(options)
-                .user(request.question());
+                .user(request.question())
+                .advisors(a -> a.param(LlmGuardAdvisor.PURPOSE, "ask")
+                        .param(LlmGuardAdvisor.PROMPT_VERSION, useSystemPrompt ? promptVersion : "none"));
         if (useSystemPrompt) {
             spec = spec.system(systemPrompt);
         }
@@ -66,7 +70,13 @@ public class AskService {
                 temperature, request.seed(), request.topK());
 
         long start = System.currentTimeMillis();
-        ChatResponse response = spec.call().chatResponse();
+        ChatResponse response;
+        MDC.put(LlmGuardAdvisor.MDC_REQUEST_ID, id);   // the guard's audit record carries this id
+        try {
+            response = spec.call().chatResponse();
+        } finally {
+            MDC.remove(LlmGuardAdvisor.MDC_REQUEST_ID);
+        }
         long latencyMs = System.currentTimeMillis() - start;
 
         String answer = response.getResult().getOutput().getText();

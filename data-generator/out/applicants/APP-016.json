@@ -1,0 +1,12 @@
+{
+  "applicantId": "APP-016",
+  "employmentType": "SALARIED",
+  "amount": 700000,
+  "tenureMonths": 48,
+  "purpose": "Home renovation",
+  "salarySlips": [
+    "PINECONE SOFTWARE PVT LTD\nEmployee Name : Pooja Kapoor\nEmployee ID   : EMP1016\nPAN           : ZZZPZ0016Z\nBank A/c No.  : 0000 0000 0016\n\nPAYSLIP FOR THE MONTH OF JULY 2026\n\nEARNINGS                            DEDUCTIONS\nBasic                     39,700    Provident Fund             1,800\nHRA                       15,900    Professional Tax             200\nConveyance                 1,600    Income Tax (TDS)           7,200\nSpecial Allowance         42,000    \n\nGross Earnings            99,200    Total Deductions           9,200\nNet Pay: 90,000\n",
+    "PINECONE SOFTWARE PVT LTD\nEmployee Name : Pooja Kapoor\nEmployee ID   : EMP1016\nPAN           : ZZZPZ0016Z\nBank A/c No.  : 0000 0000 0016\n\nPAYSLIP FOR THE MONTH OF AUGUST 2026\n\nEARNINGS                            DEDUCTIONS\nBasic                     39,700    Provident Fund             1,800\nHRA                       15,900    Professional Tax             200\nConveyance                 1,600    Income Tax (TDS)           7,200\nSpecial Allowance         42,000    \n\nGross Earnings            99,200    Total Deductions           9,200\nNet Pay: 90,000\n",
+    "PINECONE SOFTWARE PVT LTD\nEmployee Name : Pooja Kapoor\nEmployee ID   : EMP1016\nPAN           : ZZZPZ0016Z\nBank A/c No.  : 0000 0000 0016\n\nPAYSLIP FOR THE MONTH OF SEPTEMBER 2026\n\nEARNINGS                            DEDUCTIONS\nBasic                     39,700    Provident Fund             1,800\nHRA                       15,900    Professional Tax             200\nConveyance                 1,600    Income Tax (TDS)           7,200\nSpecial Allowance         42,000    \n\nGross Earnings            99,200    Total Deductions           9,200\nNet Pay: 90,000\n"
+  ]
+}

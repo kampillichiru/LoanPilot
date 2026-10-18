@@ -11,8 +11,10 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import com.loanpilot.orchestrator.guard.LlmGuardAdvisor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.SimpleLoggerAdvisor;
 import org.springframework.ai.chat.metadata.Usage;
@@ -108,6 +110,7 @@ public class AdviseService {
                 .system(systemPrompt)
                 .user(userMessage(request))
                 .toolCallbacks(recording)
+                .advisors(a -> a.param(LlmGuardAdvisor.PURPOSE, "advise").param(LlmGuardAdvisor.PROMPT_VERSION, promptVersion))
                 // Never sent to the model. Local tools can declare a ToolContext parameter; MCP tools receive it
                 // as the request's _meta (requestId correlates logs across services, applicantId is a trusted id
                 // the bureau prefers over a name the model extracted). Always non-empty: Spring AI refuses to call
@@ -119,7 +122,13 @@ public class AdviseService {
         log.info("[advise {}] Calling LLM: model={}, prompt={}, tools={}, question {} chars, applicantId given={}. Waiting...",
                 id, defaultModel, promptVersion, toolNames, request.question().length(), hasText(request.applicantId()));
         long start = System.currentTimeMillis();
-        ChatResponse response = spec.call().chatResponse();
+        ChatResponse response;
+        MDC.put(LlmGuardAdvisor.MDC_REQUEST_ID, id);   // the guard's audit record carries this id
+        try {
+            response = spec.call().chatResponse();
+        } finally {
+            MDC.remove(LlmGuardAdvisor.MDC_REQUEST_ID);
+        }
         long latencyMs = System.currentTimeMillis() - start;
 
         String answer = response.getResult().getOutput().getText();

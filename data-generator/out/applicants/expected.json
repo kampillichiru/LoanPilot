@@ -3,7 +3,26 @@
     "outcome": "APPROVE",
     "reasonCodes": [],
     "netMonthlyIncome": 85000,
-    "why": "the worked example in docs/architecture.md: FOIR 43.1%"
+    "slips": [
+      {
+        "payPeriod": "2026-07",
+        "netPay": 84000,
+        "employeeName": "Priya Sharma"
+      },
+      {
+        "payPeriod": "2026-08",
+        "netPay": 85000,
+        "employeeName": "Priya Sharma"
+      },
+      {
+        "payPeriod": "2026-09",
+        "netPay": 86000,
+        "employeeName": "Priya Sharma"
+      }
+    ],
+    "why": "the worked example: FOIR 43.1%",
+    "interestRate": 12,
+    "foirPercent": 43.1
   },
   "APP-002.json": {
     "outcome": "REJECT",
@@ -13,19 +32,76 @@
       "CREDIT_HUNGER"
     ],
     "netMonthlyIncome": 70000,
-    "why": "score 641, a 90+ DPD account, 5 enquiries"
+    "slips": [
+      {
+        "payPeriod": "2026-07",
+        "netPay": 70000,
+        "employeeName": "Rahul Verma"
+      },
+      {
+        "payPeriod": "2026-08",
+        "netPay": 70000,
+        "employeeName": "Rahul Verma"
+      },
+      {
+        "payPeriod": "2026-09",
+        "netPay": 70000,
+        "employeeName": "Rahul Verma"
+      }
+    ],
+    "why": "every reason listed, not just the first",
+    "interestRate": 12,
+    "foirPercent": 45.9
   },
   "APP-003.json": {
     "outcome": "APPROVE",
     "reasonCodes": [],
     "netMonthlyIncome": 62000,
-    "why": "no credit history: approved under §4.4 (income >= 50k, amount <= 3L)"
+    "slips": [
+      {
+        "payPeriod": "2026-07",
+        "netPay": 61500,
+        "employeeName": "Arjun Nair"
+      },
+      {
+        "payPeriod": "2026-08",
+        "netPay": 62000,
+        "employeeName": "Arjun Nair"
+      },
+      {
+        "payPeriod": "2026-09",
+        "netPay": 62500,
+        "employeeName": "Arjun Nair"
+      }
+    ],
+    "why": "no credit history, approved under §4.4",
+    "interestRate": 12,
+    "foirPercent": 19.0
   },
   "APP-004.json": {
     "outcome": "APPROVE",
     "reasonCodes": [],
     "netMonthlyIncome": 110000,
-    "why": "score 805 and FOIR <= 40%: preferential rate 11% (§6.2)"
+    "slips": [
+      {
+        "payPeriod": "2026-07",
+        "netPay": 109500,
+        "employeeName": "Sneha Reddy"
+      },
+      {
+        "payPeriod": "2026-08",
+        "netPay": 110000,
+        "employeeName": "Sneha Reddy"
+      },
+      {
+        "payPeriod": "2026-09",
+        "netPay": 110500,
+        "employeeName": "Sneha Reddy"
+      }
+    ],
+    "why": "preferential rate 11% (§6.2)",
+    "interestRate": 11,
+    "foirPercent": 30.2
   },
   "APP-005.json": {
     "outcome": "REJECT",
@@ -34,7 +110,406 @@
       "CREDIT_HUNGER"
     ],
     "netMonthlyIncome": 95000,
-    "why": "score 698, one point under 700; 7 enquiries"
+    "slips": [
+      {
+        "payPeriod": "2026-07",
+        "netPay": 95000,
+        "employeeName": "Karan Mehta"
+      },
+      {
+        "payPeriod": "2026-08",
+        "netPay": 95000,
+        "employeeName": "Karan Mehta"
+      },
+      {
+        "payPeriod": "2026-09",
+        "netPay": 95000,
+        "employeeName": "Karan Mehta"
+      }
+    ],
+    "why": "CIBIL 698, one under 700",
+    "interestRate": 12,
+    "foirPercent": 48.3
+  },
+  "APP-006.json": {
+    "outcome": "APPROVE",
+    "reasonCodes": [],
+    "netMonthlyIncome": 60000,
+    "slips": [
+      {
+        "payPeriod": "2026-07",
+        "netPay": 59500,
+        "employeeName": "Ananya Iyer"
+      },
+      {
+        "payPeriod": "2026-08",
+        "netPay": 60000,
+        "employeeName": "Ananya Iyer"
+      },
+      {
+        "payPeriod": "2026-09",
+        "netPay": 60500,
+        "employeeName": "Ananya Iyer"
+      }
+    ],
+    "why": "FOIR exactly 50.000%: the limit is <= 50%, so it passes",
+    "interestRate": 12,
+    "foirPercent": 50.0
+  },
+  "APP-007.json": {
+    "outcome": "REJECT",
+    "reasonCodes": [
+      "FOIR_EXCEEDED"
+    ],
+    "netMonthlyIncome": 60000,
+    "slips": [
+      {
+        "payPeriod": "2026-07",
+        "netPay": 59500,
+        "employeeName": "Aditya Kulkarni"
+      },
+      {
+        "payPeriod": "2026-08",
+        "netPay": 60000,
+        "employeeName": "Aditya Kulkarni"
+      },
+      {
+        "payPeriod": "2026-09",
+        "netPay": 60500,
+        "employeeName": "Aditya Kulkarni"
+      }
+    ],
+    "why": "FOIR 50.002%: displays as 50.0% but fails",
+    "interestRate": 12,
+    "foirPercent": 50.0
+  },
+  "APP-008.json": {
+    "outcome": "APPROVE",
+    "reasonCodes": [],
+    "netMonthlyIncome": 55000,
+    "slips": [
+      {
+        "payPeriod": "2026-07",
+        "netPay": 54500,
+        "employeeName": "Kavya Menon"
+      },
+      {
+        "payPeriod": "2026-08",
+        "netPay": 55000,
+        "employeeName": "Kavya Menon"
+      },
+      {
+        "payPeriod": "2026-09",
+        "netPay": 55500,
+        "employeeName": "Kavya Menon"
+      }
+    ],
+    "why": "CIBIL exactly 700: the minimum, so it passes",
+    "interestRate": 12,
+    "foirPercent": 40.2
+  },
+  "APP-009.json": {
+    "outcome": "APPROVE",
+    "reasonCodes": [],
+    "netMonthlyIncome": 65000,
+    "slips": [
+      {
+        "payPeriod": "2026-07",
+        "netPay": 65000,
+        "employeeName": "Meera Joshi"
+      },
+      {
+        "payPeriod": "2026-08",
+        "netPay": 65000,
+        "employeeName": "Meera Joshi"
+      },
+      {
+        "payPeriod": "2026-09",
+        "netPay": 65000,
+        "employeeName": "Meera Joshi"
+      }
+    ],
+    "why": "4 enquiries: the maximum allowed",
+    "interestRate": 12,
+    "foirPercent": 35.8
+  },
+  "APP-010.json": {
+    "outcome": "REFER",
+    "reasonCodes": [
+      "CREDIT_HUNGER"
+    ],
+    "netMonthlyIncome": 65000,
+    "slips": [
+      {
+        "payPeriod": "2026-07",
+        "netPay": 64500,
+        "employeeName": "Karthik Rao"
+      },
+      {
+        "payPeriod": "2026-08",
+        "netPay": 65000,
+        "employeeName": "Karthik Rao"
+      },
+      {
+        "payPeriod": "2026-09",
+        "netPay": 65500,
+        "employeeName": "Karthik Rao"
+      }
+    ],
+    "why": "5 enquiries: one too many, refer to an officer",
+    "interestRate": 12,
+    "foirPercent": 35.8
+  },
+  "APP-011.json": {
+    "outcome": "REJECT",
+    "reasonCodes": [
+      "INCOME_BELOW_MINIMUM"
+    ],
+    "netMonthlyIncome": 24000,
+    "slips": [
+      {
+        "payPeriod": "2026-07",
+        "netPay": 24000,
+        "employeeName": "Deepa Pillai"
+      },
+      {
+        "payPeriod": "2026-08",
+        "netPay": 24000,
+        "employeeName": "Deepa Pillai"
+      },
+      {
+        "payPeriod": "2026-09",
+        "netPay": 24000,
+        "employeeName": "Deepa Pillai"
+      }
+    ],
+    "why": "income 24,000, under the 25,000 minimum",
+    "interestRate": 12,
+    "foirPercent": 22.2
+  },
+  "APP-012.json": {
+    "outcome": "REJECT",
+    "reasonCodes": [
+      "LOAN_ABOVE_MAXIMUM"
+    ],
+    "netMonthlyIncome": 45000,
+    "slips": [
+      {
+        "payPeriod": "2026-07",
+        "netPay": 45000,
+        "employeeName": "Suresh Patil"
+      },
+      {
+        "payPeriod": "2026-08",
+        "netPay": 45000,
+        "employeeName": "Suresh Patil"
+      },
+      {
+        "payPeriod": "2026-09",
+        "netPay": 45000,
+        "employeeName": "Suresh Patil"
+      }
+    ],
+    "why": "asks 9.5L, maximum is 20 x 45,000 = 9L",
+    "interestRate": 12,
+    "foirPercent": 47.0
+  },
+  "APP-013.json": {
+    "outcome": "REJECT",
+    "reasonCodes": [
+      "NO_CREDIT_HISTORY_NOT_ELIGIBLE",
+      "LOAN_ABOVE_MAXIMUM"
+    ],
+    "netMonthlyIncome": 70000,
+    "slips": [
+      {
+        "payPeriod": "2026-07",
+        "netPay": 69500,
+        "employeeName": "Farhan Qureshi"
+      },
+      {
+        "payPeriod": "2026-08",
+        "netPay": 70000,
+        "employeeName": "Farhan Qureshi"
+      },
+      {
+        "payPeriod": "2026-09",
+        "netPay": 70500,
+        "employeeName": "Farhan Qureshi"
+      }
+    ],
+    "why": "no history and asks 4L: over the 3L cap, two rules fail",
+    "interestRate": 12,
+    "foirPercent": 19.0
+  },
+  "APP-014.json": {
+    "outcome": "REJECT",
+    "reasonCodes": [
+      "NO_CREDIT_HISTORY_NOT_ELIGIBLE"
+    ],
+    "netMonthlyIncome": 45000,
+    "slips": [
+      {
+        "payPeriod": "2026-07",
+        "netPay": 45000,
+        "employeeName": "Lakshmi Das"
+      },
+      {
+        "payPeriod": "2026-08",
+        "netPay": 45000,
+        "employeeName": "Lakshmi Das"
+      },
+      {
+        "payPeriod": "2026-09",
+        "netPay": 45000,
+        "employeeName": "Lakshmi Das"
+      }
+    ],
+    "why": "no history and income 45,000, under the 50,000 needed",
+    "interestRate": 12,
+    "foirPercent": 20.9
+  },
+  "APP-015.json": {
+    "outcome": "APPROVE",
+    "reasonCodes": [],
+    "netMonthlyIncome": 90000,
+    "slips": [
+      {
+        "payPeriod": "2026-07",
+        "netPay": 89500,
+        "employeeName": "Nikhil Bansal"
+      },
+      {
+        "payPeriod": "2026-08",
+        "netPay": 90000,
+        "employeeName": "Nikhil Bansal"
+      },
+      {
+        "payPeriod": "2026-09",
+        "netPay": 90500,
+        "employeeName": "Nikhil Bansal"
+      }
+    ],
+    "why": "CIBIL exactly 750 and FOIR under 40%: preferential 11%",
+    "interestRate": 11,
+    "foirPercent": 31.2
+  },
+  "APP-016.json": {
+    "outcome": "APPROVE",
+    "reasonCodes": [],
+    "netMonthlyIncome": 90000,
+    "slips": [
+      {
+        "payPeriod": "2026-07",
+        "netPay": 90000,
+        "employeeName": "Pooja Kapoor"
+      },
+      {
+        "payPeriod": "2026-08",
+        "netPay": 90000,
+        "employeeName": "Pooja Kapoor"
+      },
+      {
+        "payPeriod": "2026-09",
+        "netPay": 90000,
+        "employeeName": "Pooja Kapoor"
+      }
+    ],
+    "why": "CIBIL 790 but FOIR 40.5% at 12%: standard rate",
+    "interestRate": 12,
+    "foirPercent": 40.5
+  },
+  "APP-017.json": {
+    "outcome": "REJECT",
+    "reasonCodes": [
+      "TENURE_OUT_OF_RANGE"
+    ],
+    "netMonthlyIncome": 80000,
+    "slips": [
+      {
+        "payPeriod": "2026-07",
+        "netPay": 79500,
+        "employeeName": "Imran Sheikh"
+      },
+      {
+        "payPeriod": "2026-08",
+        "netPay": 80000,
+        "employeeName": "Imran Sheikh"
+      },
+      {
+        "payPeriod": "2026-09",
+        "netPay": 80500,
+        "employeeName": "Imran Sheikh"
+      }
+    ],
+    "why": "72 months, the maximum is 60",
+    "interestRate": 11,
+    "foirPercent": 18.1
+  },
+  "APP-018.json": {
+    "outcome": "REJECT",
+    "reasonCodes": [
+      "FOIR_EXCEEDED"
+    ],
+    "netMonthlyIncome": 60000,
+    "slips": [],
+    "why": "self-employed limit is 45% (§4.3): FOIR 46.5% would pass for salaried",
+    "declaredOnly": true,
+    "interestRate": 12,
+    "foirPercent": 46.5
+  },
+  "APP-019.json": {
+    "outcome": "REFER",
+    "reasonCodes": [
+      "BUREAU_NOT_FOUND"
+    ],
+    "netMonthlyIncome": 70000,
+    "slips": [
+      {
+        "payPeriod": "2026-07",
+        "netPay": 70000,
+        "employeeName": "Divya Menon"
+      },
+      {
+        "payPeriod": "2026-08",
+        "netPay": 70000,
+        "employeeName": "Divya Menon"
+      },
+      {
+        "payPeriod": "2026-09",
+        "netPay": 70000,
+        "employeeName": "Divya Menon"
+      }
+    ],
+    "why": "not at the bureau: can't assess creditworthiness",
+    "interestRate": 12,
+    "foirPercent": 14.2
+  },
+  "APP-020.json": {
+    "outcome": "REFER",
+    "reasonCodes": [
+      "NAME_MISMATCH_ACROSS_SLIPS"
+    ],
+    "netMonthlyIncome": null,
+    "slips": [
+      {
+        "payPeriod": "2026-07",
+        "netPay": 71500,
+        "employeeName": "Rohit Gupta"
+      },
+      {
+        "payPeriod": "2026-08",
+        "netPay": 72000,
+        "employeeName": "Rohit Gupta"
+      },
+      {
+        "payPeriod": "2026-09",
+        "netPay": 72500,
+        "employeeName": "Rohan Gupta"
+      }
+    ],
+    "why": "September slip says Rohan Gupta: facts not established",
+    "slipsOnly": true
   },
   "APP-001-duplicate-month.json": {
     "outcome": "REFER",
@@ -43,6 +518,33 @@
     ],
     "netMonthlyIncome": null,
     "slipsOnly": true,
-    "why": "the same month sent twice: facts not established, rules not run"
+    "slips": [
+      {
+        "payPeriod": "2026-07",
+        "netPay": 84000,
+        "employeeName": "Priya Sharma"
+      },
+      {
+        "payPeriod": "2026-08",
+        "netPay": 85000,
+        "employeeName": "Priya Sharma"
+      },
+      {
+        "payPeriod": "2026-08",
+        "netPay": 85000,
+        "employeeName": "Priya Sharma"
+      }
+    ],
+    "why": "the same month sent twice"
+  },
+  "APP-009-tampered-slip.json": {
+    "outcome": "REFER",
+    "reasonCodes": [
+      "SLIP_EXTRACTION_FAILED"
+    ],
+    "netMonthlyIncome": null,
+    "slipsOnly": true,
+    "slips": [],
+    "why": "August prints Net Pay 66,000 but gross - deductions = 65,000: validation must catch it"
   }
 }

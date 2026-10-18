@@ -310,3 +310,63 @@ MEMO 140 s. The decision is the fastest step; the LLM edges are 99.99% of the ti
 **What the memo check misses** (for POC 8): it checks the outcome and the citations, not content. Sneha's memo
 omits her 11% rate; two memos say "meeting all policy criteria" while 4 checks are NOT_CHECKED; §4.8 shows as
 both passed (DPD) and not verified (bounces) because one clause holds two rules.
+
+## POC 8: Guardrails + evals
+
+POC 7 worked, but two architecture rules were only half met: salary slips went to the LLM with PAN and bank
+account inside (rule 2), and LLM calls weren't recorded in one place (rule 3). And "it worked on 5 applicants"
+isn't evidence. POC 8 adds **one guard on every LLM call** and **a golden set that scores the whole pipeline**.
+
+```
+any service ── ChatClient ──► LlmGuardAdvisor (registered on every ChatClient, ADR-0004)
+                                1 mask    PAN, Aadhaar, account no., phone, email → [PAN] [ACCOUNT_NUMBER] ...
+                                2 call    the model only ever sees masked text
+                                3 audit   one JSON line: purpose, model, prompt version, SHA-256 of input,
+                                          output, tokens, latency, PII counts (fail closed: no record, no output)
+memo ──► MemoFaithfulness (code): every number must come from the memo input, key figures present,
+         unverified sections disclosed, failed sections cited, no "all checks passed" while anything is unverified
+```
+
+### What's here
+
+| File | Purpose |
+|------|---------|
+| `privacy/PiiMasker.java` | Regex masker, one-way. Over-masks rather than under-masks (unlabelled 12 digits = Aadhaar) |
+| `guard/LlmGuardAdvisor.java` + `GuardConfig.java` | Mask → call → audit, on every `ChatClient` via a `ChatClientCustomizer`: a service can't forget it |
+| `audit/JsonlAuditLog.java` | Append-only `audit/llm-calls.jsonl` (git-ignored). Stores the input's hash, not the input |
+| `audit/AuditController.java` | `GET /api/audit?requestId=...&limit=20` |
+| `application/MemoFaithfulness.java` | The faithfulness check, in code (deterministic, free, runs on every memo) |
+| `resources/prompts/credit-memo-v5.st` | Active memo prompt: copies a conclusion sentence chosen by code (see Results) |
+| `../data-generator/applicants.py` | The golden set: 20 applicants, each on one rule boundary, + 2 bad-document cases |
+| `../evals/run_applications.py` | Scores extraction, decision, consistency, faithfulness, masking, audit → `evals/reports/` |
+
+Each application response now lists its LLM calls (purpose, prompt version, input hash, PII counts, audit id).
+
+### Results (full golden set, salary slips, qwen2.5:7b on CPU)
+
+Report: [`evals/reports/report-full-20261018-160956.md`](../evals/reports/report-full-20261018-160956.md)
+
+| Metric | Score |
+|---|---|
+| **Extraction** (month + net pay per slip) | **100%** (60/60) |
+| **Decision** (outcome, reasons, income, rate, FOIR) | **100%** (21/21) |
+| **Memo consistency** (outcome + citations) | **100%** (21/21) |
+| **Memo faithfulness** (figures, disclosures, no overclaim) | **100%** (19/19 memos; 2 REFERs have code-written memos) |
+| **PII masked** (slip calls with PAN + account masked) | **100%** (60/60) |
+| **Audited** (LLM calls with a record) | **100%** (79/79) |
+
+21 of the 22 cases ran (2 h 38 min). The last one, `APP-009-tampered-slip`, didn't: the run was stopped by a
+low-memory kill on the machine, not by the app. Run it alone with `python evals/run_applications.py --only APP-009-t`.
+The audit log after the run: 94 records, 0 PANs, 0 phone numbers.
+
+**How the memo got to 100% faithful** (the part worth remembering):
+
+| Prompt | Instruction | APP-001 memo | Faithful |
+|---|---|---|---|
+| v3 | "Never write meets all criteria" | "...all criteria..." (4 sections unverified) | ❌ OVERCLAIM |
+| v4 | "Choose ONE of these two sentences" | "recommends APPROVE **because all checks passed**; the items under Not verified still need..." (blended both) | ❌ OVERCLAIM |
+| v5 | Code picks the sentence (`summaryOpening()`), the model copies it | "The checks the engine could run passed; the items under Not verified still need the credit officer." | ✅ (19/19) |
+
+A 7B model doesn't follow "don't" or "if A then B" reliably. Taking the choice away from it does work, and it's
+rule 1 again: code decides, the LLM explains. Earlier reports are kept in `evals/reports/` for comparison.
+

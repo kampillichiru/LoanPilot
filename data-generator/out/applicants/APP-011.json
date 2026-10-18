@@ -1,0 +1,12 @@
+{
+  "applicantId": "APP-011",
+  "employmentType": "SALARIED",
+  "amount": 60000,
+  "tenureMonths": 12,
+  "purpose": "Laptop",
+  "salarySlips": [
+    "ACME INFOTECH PVT LTD\nEmployee Name : Deepa Pillai\nEmployee ID   : EMP1011\nPAN           : ZZZPZ0011Z\nBank A/c No.  : 0000 0000 0011\n\nPAYSLIP FOR THE MONTH OF JULY 2026\n\nEARNINGS                            DEDUCTIONS\nBasic                     11,200    Provident Fund             1,800\nHRA                        4,500    Professional Tax             200\nConveyance                 1,600    Income Tax (TDS)           1,920\nSpecial Allowance         10,620    \n\nGross Earnings            27,920    Total Deductions           3,920\nNet Pay: 24,000\n",
+    "ACME INFOTECH PVT LTD\nEmployee Name : Deepa Pillai\nEmployee ID   : EMP1011\nPAN           : ZZZPZ0011Z\nBank A/c No.  : 0000 0000 0011\n\nPAYSLIP FOR THE MONTH OF AUGUST 2026\n\nEARNINGS                            DEDUCTIONS\nBasic                     11,200    Provident Fund             1,800\nHRA                        4,500    Professional Tax             200\nConveyance                 1,600    Income Tax (TDS)           1,920\nSpecial Allowance         10,620    \n\nGross Earnings            27,920    Total Deductions           3,920\nNet Pay: 24,000\n",
+    "ACME INFOTECH PVT LTD\nEmployee Name : Deepa Pillai\nEmployee ID   : EMP1011\nPAN           : ZZZPZ0011Z\nBank A/c No.  : 0000 0000 0011\n\nPAYSLIP FOR THE MONTH OF SEPTEMBER 2026\n\nEARNINGS                            DEDUCTIONS\nBasic                     11,200    Provident Fund             1,800\nHRA                        4,500    Professional Tax             200\nConveyance                 1,600    Income Tax (TDS)           1,920\nSpecial Allowance         10,620    \n\nGross Earnings            27,920    Total Deductions           3,920\nNet Pay: 24,000\n"
+  ]
+}

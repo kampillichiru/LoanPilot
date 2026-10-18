@@ -2,9 +2,11 @@ package com.loanpilot.orchestrator.application;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 
 import com.loanpilot.orchestrator.decision.ApplicantFacts;
 import com.loanpilot.orchestrator.decision.Decision;
+import com.loanpilot.orchestrator.privacy.PiiType;
 
 /**
  * One application, start to finish: the engine's decision, the facts it used and where they came from, the memo,
@@ -27,6 +29,7 @@ public record ApplicationResult(
         String memo,
         MemoCheck memoCheck,
         List<Step> steps,
+        List<LlmCall> llmCalls,
         long totalMs) {
 
     /**
@@ -42,12 +45,26 @@ public record ApplicationResult(
     }
 
     /**
-     * @param status  OK, OUTCOME_MISMATCH (memo recommends something other than the engine), UNSUPPORTED_CITATION,
-     *                MISSING_RECOMMENDATION, or NOT_GENERATED (code wrote the memo; no LLM call)
+     * @param status    OK, OUTCOME_MISMATCH (memo recommends something other than the engine), UNSUPPORTED_CITATION,
+     *                  MISSING_RECOMMENDATION, or NOT_GENERATED (code wrote the memo; no LLM call)
+     * @param faithful  POC 8: does the memo state only what the decision says, and everything it must?
+     *                  null when no LLM wrote the memo. Details in faithfulnessIssues (see MemoFaithfulness)
      */
     public record MemoCheck(String status, String memoRecommendation, List<String> citations,
                             List<String> unsupportedCitations, String model, String promptVersion,
-                            Integer promptTokens, Integer completionTokens) {
+                            Integer promptTokens, Integer completionTokens,
+                            Boolean faithful, List<String> faithfulnessIssues) {
+    }
+
+    /**
+     * One LLM call made for this application, from the audit log (POC 8). The full record, including the output,
+     * is in the audit file and at GET /api/audit?requestId={applicationId}.
+     *
+     * @param piiMasked how many values of each type the guard masked before the call
+     */
+    public record LlmCall(String purpose, String model, String promptVersion, String inputSha256,
+                          Map<PiiType, Integer> piiMasked, Integer promptTokens, Integer completionTokens,
+                          long latencyMs, String auditId) {
     }
 
     /** @param status OK, FAILED or SKIPPED */

@@ -1,0 +1,12 @@
+{
+  "applicantId": "APP-015",
+  "employmentType": "SALARIED",
+  "amount": 700000,
+  "tenureMonths": 48,
+  "purpose": "Education",
+  "salarySlips": [
+    "SUNRISE TEXTILES LTD\nEmployee Name : Nikhil Bansal\nEmployee ID   : EMP1015\nPAN           : ZZZPZ0015Z\nBank A/c No.  : 0000 0000 0015\n\nPAYSLIP FOR THE MONTH OF JULY 2026\n\nEARNINGS                            DEDUCTIONS\nBasic                     39,500    Provident Fund             1,800\nHRA                       15,800    Professional Tax             200\nConveyance                 1,600    Income Tax (TDS)           7,160\nSpecial Allowance         41,760    \n\nGross Earnings            98,660    Total Deductions           9,160\nNet Pay: 89,500\n",
+    "SUNRISE TEXTILES LTD\nEmployee Name : Nikhil Bansal\nEmployee ID   : EMP1015\nPAN           : ZZZPZ0015Z\nBank A/c No.  : 0000 0000 0015\n\nPAYSLIP FOR THE MONTH OF AUGUST 2026\n\nEARNINGS                            DEDUCTIONS\nBasic                     39,700    Provident Fund             1,800\nHRA                       15,900    Professional Tax             200\nConveyance                 1,600    Income Tax (TDS)           7,200\nSpecial Allowance         42,000    \n\nGross Earnings            99,200    Total Deductions           9,200\nNet Pay: 90,000\n",
+    "SUNRISE TEXTILES LTD\nEmployee Name : Nikhil Bansal\nEmployee ID   : EMP1015\nPAN           : ZZZPZ0015Z\nBank A/c No.  : 0000 0000 0015\n\nPAYSLIP FOR THE MONTH OF SEPTEMBER 2026\n\nEARNINGS                            DEDUCTIONS\nBasic                     39,900    Provident Fund             1,800\nHRA                       16,000    Professional Tax             200\nConveyance                 1,600    Income Tax (TDS)           7,240\nSpecial Allowance         42,240    \n\nGross Earnings            99,740    Total Deductions           9,240\nNet Pay: 90,500\n"
+  ]
+}

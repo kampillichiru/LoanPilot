@@ -1,0 +1,12 @@
+{
+  "applicantId": "APP-017",
+  "employmentType": "SALARIED",
+  "amount": 500000,
+  "tenureMonths": 72,
+  "purpose": "Car",
+  "salarySlips": [
+    "RIVERBEND PHARMA LTD\nEmployee Name : Imran Sheikh\nEmployee ID   : EMP1017\nPAN           : ZZZPZ0017Z\nBank A/c No.  : 0000 0000 0017\n\nPAYSLIP FOR THE MONTH OF JULY 2026\n\nEARNINGS                            DEDUCTIONS\nBasic                     35,100    Provident Fund             1,800\nHRA                       14,000    Professional Tax             200\nConveyance                 1,600    Income Tax (TDS)           6,360\nSpecial Allowance         37,160    \n\nGross Earnings            87,860    Total Deductions           8,360\nNet Pay: 79,500\n",
+    "RIVERBEND PHARMA LTD\nEmployee Name : Imran Sheikh\nEmployee ID   : EMP1017\nPAN           : ZZZPZ0017Z\nBank A/c No.  : 0000 0000 0017\n\nPAYSLIP FOR THE MONTH OF AUGUST 2026\n\nEARNINGS                            DEDUCTIONS\nBasic                     35,400    Provident Fund             1,800\nHRA                       14,200    Professional Tax             200\nConveyance                 1,600    Income Tax (TDS)           6,400\nSpecial Allowance         37,200    \n\nGross Earnings            88,400    Total Deductions           8,400\nNet Pay: 80,000\n",
+    "RIVERBEND PHARMA LTD\nEmployee Name : Imran Sheikh\nEmployee ID   : EMP1017\nPAN           : ZZZPZ0017Z\nBank A/c No.  : 0000 0000 0017\n\nPAYSLIP FOR THE MONTH OF SEPTEMBER 2026\n\nEARNINGS                            DEDUCTIONS\nBasic                     35,600    Provident Fund             1,800\nHRA                       14,200    Professional Tax             200\nConveyance                 1,600    Income Tax (TDS)           6,440\nSpecial Allowance         37,540    \n\nGross Earnings            88,940    Total Deductions           8,440\nNet Pay: 80,500\n"
+  ]
+}

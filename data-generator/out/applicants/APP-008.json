@@ -1,0 +1,12 @@
+{
+  "applicantId": "APP-008",
+  "employmentType": "SALARIED",
+  "amount": 300000,
+  "tenureMonths": 24,
+  "purpose": "Furniture",
+  "salarySlips": [
+    "SKYLINE CONSTRUCTIONS PVT LTD\nEmployee Name : Kavya Menon\nEmployee ID   : EMP1008\nPAN           : ZZZPZ0008Z\nBank A/c No.  : 0000 0000 0008\n\nPAYSLIP FOR THE MONTH OF JULY 2026\n\nEARNINGS                            DEDUCTIONS\nBasic                     24,300    Provident Fund             1,800\nHRA                        9,700    Professional Tax             200\nConveyance                 1,600    Income Tax (TDS)           4,360\nSpecial Allowance         25,260    \n\nGross Earnings            60,860    Total Deductions           6,360\nNet Pay: 54,500\n",
+    "SKYLINE CONSTRUCTIONS PVT LTD\nEmployee Name : Kavya Menon\nEmployee ID   : EMP1008\nPAN           : ZZZPZ0008Z\nBank A/c No.  : 0000 0000 0008\n\nPAYSLIP FOR THE MONTH OF AUGUST 2026\n\nEARNINGS                            DEDUCTIONS\nBasic                     24,600    Provident Fund             1,800\nHRA                        9,800    Professional Tax             200\nConveyance                 1,600    Income Tax (TDS)           4,400\nSpecial Allowance         25,400    \n\nGross Earnings            61,400    Total Deductions           6,400\nNet Pay: 55,000\n",
+    "SKYLINE CONSTRUCTIONS PVT LTD\nEmployee Name : Kavya Menon\nEmployee ID   : EMP1008\nPAN           : ZZZPZ0008Z\nBank A/c No.  : 0000 0000 0008\n\nPAYSLIP FOR THE MONTH OF SEPTEMBER 2026\n\nEARNINGS                            DEDUCTIONS\nBasic                     24,800    Provident Fund             1,800\nHRA                        9,900    Professional Tax             200\nConveyance                 1,600    Income Tax (TDS)           4,440\nSpecial Allowance         25,640    \n\nGross Earnings            61,940    Total Deductions           6,440\nNet Pay: 55,500\n"
+  ]
+}

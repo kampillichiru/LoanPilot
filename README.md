@@ -24,7 +24,7 @@ See [docs/architecture.md](docs/architecture.md) for the system map (where the L
 | 5 | MCP client | Remote tool discovery | `loan-orchestrator` | ✅ done |
 | 6 | RAG over credit policy | Embeddings, chunking, Qdrant | `policy-docs` + orchestrator | ✅ done (16/16) |
 | 7 | Decision engine + workflow | LLM explains, code decides | `loan-orchestrator` | ✅ done (11/11 live) |
-| 8 | Guardrails + evals | PII masking, audit, golden set | `evals` | ⬜ |
+| 8 | Guardrails + evals | PII masking, audit, golden set | `loan-orchestrator` + `evals` | ✅ done (21/21, all metrics 100%) |
 
 Details per POC: [docs/roadmap.md](docs/roadmap.md)
 
@@ -39,7 +39,7 @@ LoanPilot/
 │   ├── architecture.md    ← system map: as built (POC 1–8) + target design
 │   ├── roadmap.md         ← the 8 POCs in detail
 │   └── adr/               ← Architecture Decision Records
-├── loan-orchestrator/     ← main Spring Boot app (POC 1, 2, 3, 5, 7)
+├── loan-orchestrator/     ← main Spring Boot app (POC 1, 2, 3, 5, 7, 8)
 ├── mcp-credit-bureau/     ← mock CIBIL MCP server (POC 4)
 ├── policy-docs/           ← sample credit policy for RAG (POC 6)
 ├── data-generator/        ← Python: synthetic applicants & PDFs (POC 2+)
@@ -57,7 +57,8 @@ LoanPilot/
 | Qdrant | POC 6 | GitHub Releases → `qdrant-x86_64-pc-windows-msvc.zip`, run `qdrant.exe` |
 | Python 3.11+ | POC 2+ | ✅ already installed |
 
-## Quick start: POC 1–7
+## Quick start: POC 1–8
 
-- POC 1–3, 5–7: [loan-orchestrator/README.md](loan-orchestrator/README.md)
+- POC 1–3, 5–8: [loan-orchestrator/README.md](loan-orchestrator/README.md)
+- POC 8 eval: [evals/README.md](evals/README.md), latest report in [evals/reports/](evals/reports/)
 - POC 4: [mcp-credit-bureau/README.md](mcp-credit-bureau/README.md)

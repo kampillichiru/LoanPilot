@@ -1,0 +1,12 @@
+{
+  "applicantId": "APP-006",
+  "employmentType": "SALARIED",
+  "amount": 500000,
+  "tenureMonths": 36,
+  "purpose": "Home repair",
+  "salarySlips": [
+    "PINECONE SOFTWARE PVT LTD\nEmployee Name : Ananya Iyer\nEmployee ID   : EMP1006\nPAN           : ZZZPZ0006Z\nBank A/c No.  : 0000 0000 0006\n\nPAYSLIP FOR THE MONTH OF JULY 2026\n\nEARNINGS                            DEDUCTIONS\nBasic                     26,500    Provident Fund             1,800\nHRA                       10,600    Professional Tax             200\nConveyance                 1,600    Income Tax (TDS)           4,760\nSpecial Allowance         27,560    \n\nGross Earnings            66,260    Total Deductions           6,760\nNet Pay: 59,500\n",
+    "PINECONE SOFTWARE PVT LTD\nEmployee Name : Ananya Iyer\nEmployee ID   : EMP1006\nPAN           : ZZZPZ0006Z\nBank A/c No.  : 0000 0000 0006\n\nPAYSLIP FOR THE MONTH OF AUGUST 2026\n\nEARNINGS                            DEDUCTIONS\nBasic                     26,700    Provident Fund             1,800\nHRA                       10,700    Professional Tax             200\nConveyance                 1,600    Income Tax (TDS)           4,800\nSpecial Allowance         27,800    \n\nGross Earnings            66,800    Total Deductions           6,800\nNet Pay: 60,000\n",
+    "PINECONE SOFTWARE PVT LTD\nEmployee Name : Ananya Iyer\nEmployee ID   : EMP1006\nPAN           : ZZZPZ0006Z\nBank A/c No.  : 0000 0000 0006\n\nPAYSLIP FOR THE MONTH OF SEPTEMBER 2026\n\nEARNINGS                            DEDUCTIONS\nBasic                     26,900    Provident Fund             1,800\nHRA                       10,800    Professional Tax             200\nConveyance                 1,600    Income Tax (TDS)           4,840\nSpecial Allowance         28,040    \n\nGross Earnings            67,340    Total Deductions           6,840\nNet Pay: 60,500\n"
+  ]
+}

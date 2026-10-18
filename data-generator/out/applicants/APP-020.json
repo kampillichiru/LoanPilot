@@ -1,0 +1,12 @@
+{
+  "applicantId": "APP-020",
+  "employmentType": "SALARIED",
+  "amount": 350000,
+  "tenureMonths": 36,
+  "purpose": "Travel",
+  "salarySlips": [
+    "LOTUS RETAIL LTD\nEmployee Name : Rohit Gupta\nEmployee ID   : EMP1020\nPAN           : ZZZPZ0020Z\nBank A/c No.  : 0000 0000 0020\n\nPAYSLIP FOR THE MONTH OF JULY 2026\n\nEARNINGS                            DEDUCTIONS\nBasic                     31,700    Provident Fund             1,800\nHRA                       12,700    Professional Tax             200\nConveyance                 1,600    Income Tax (TDS)           5,720\nSpecial Allowance         33,220    \n\nGross Earnings            79,220    Total Deductions           7,720\nNet Pay: 71,500\n",
+    "LOTUS RETAIL LTD\nEmployee Name : Rohit Gupta\nEmployee ID   : EMP1020\nPAN           : ZZZPZ0020Z\nBank A/c No.  : 0000 0000 0020\n\nPAYSLIP FOR THE MONTH OF AUGUST 2026\n\nEARNINGS                            DEDUCTIONS\nBasic                     31,900    Provident Fund             1,800\nHRA                       12,800    Professional Tax             200\nConveyance                 1,600    Income Tax (TDS)           5,760\nSpecial Allowance         33,460    \n\nGross Earnings            79,760    Total Deductions           7,760\nNet Pay: 72,000\n",
+    "LOTUS RETAIL LTD\nEmployee Name : Rohan Gupta\nEmployee ID   : EMP1020\nPAN           : ZZZPZ0020Z\nBank A/c No.  : 0000 0000 0020\n\nPAYSLIP FOR THE MONTH OF SEPTEMBER 2026\n\nEARNINGS                            DEDUCTIONS\nBasic                     32,100    Provident Fund             1,800\nHRA                       12,800    Professional Tax             200\nConveyance                 1,600    Income Tax (TDS)           5,800\nSpecial Allowance         33,800    \n\nGross Earnings            80,300    Total Deductions           7,800\nNet Pay: 72,500\n"
+  ]
+}

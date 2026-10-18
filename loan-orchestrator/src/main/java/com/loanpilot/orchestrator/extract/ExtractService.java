@@ -7,6 +7,7 @@ import java.util.HexFormat;
 import java.util.List;
 
 import jakarta.validation.Validator;
+import com.loanpilot.orchestrator.guard.LlmGuardAdvisor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.chat.client.ChatClient;
@@ -86,6 +87,8 @@ public class ExtractService {
                 .options(options)
                 .system(systemPrompt)
                 .user(userMessage)
+                .advisors(a -> a.param(LlmGuardAdvisor.PURPOSE, "slip-extraction")
+                        .param(LlmGuardAdvisor.PROMPT_VERSION, promptVersion))
                 .call()
                 .chatResponse();
         long latencyMs = System.currentTimeMillis() - start;

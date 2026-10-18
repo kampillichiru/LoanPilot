@@ -9,8 +9,10 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
+import com.loanpilot.orchestrator.guard.LlmGuardAdvisor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.SimpleLoggerAdvisor;
 import org.springframework.ai.chat.metadata.Usage;
@@ -100,12 +102,20 @@ public class PolicyService {
         log.info("[policy {}] Calling LLM with {} clause(s): model={}, prompt={}. Waiting...",
                 id, retrieved.size(), defaultModel, promptVersion);
         long llmStart = System.currentTimeMillis();
-        ChatResponse response = chatClient.prompt()
+        MDC.put(LlmGuardAdvisor.MDC_REQUEST_ID, id);   // the guard's audit record carries this id
+        ChatResponse response;
+        try {
+            response = chatClient.prompt()
                 .options(options)
                 .system(systemPrompt)
                 .user(userMessage(request.question(), retrieved))
+                .advisors(a -> a.param(LlmGuardAdvisor.PURPOSE, "policy-answer")
+                        .param(LlmGuardAdvisor.PROMPT_VERSION, promptVersion))
                 .call()
                 .chatResponse();
+        } finally {
+            MDC.remove(LlmGuardAdvisor.MDC_REQUEST_ID);
+        }
         long llmMs = System.currentTimeMillis() - llmStart;
 
         String answer = response.getResult().getOutput().getText();

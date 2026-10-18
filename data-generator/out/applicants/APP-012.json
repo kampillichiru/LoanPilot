@@ -1,0 +1,12 @@
+{
+  "applicantId": "APP-012",
+  "employmentType": "SALARIED",
+  "amount": 950000,
+  "tenureMonths": 60,
+  "purpose": "Home renovation",
+  "salarySlips": [
+    "BLUEWAVE LOGISTICS LTD\nEmployee Name : Suresh Patil\nEmployee ID   : EMP1012\nPAN           : ZZZPZ0012Z\nBank A/c No.  : 0000 0000 0012\n\nPAYSLIP FOR THE MONTH OF JULY 2026\n\nEARNINGS                            DEDUCTIONS\nBasic                     20,200    Provident Fund             1,800\nHRA                        8,100    Professional Tax             200\nConveyance                 1,600    Income Tax (TDS)           3,600\nSpecial Allowance         20,700    \n\nGross Earnings            50,600    Total Deductions           5,600\nNet Pay: 45,000\n",
+    "BLUEWAVE LOGISTICS LTD\nEmployee Name : Suresh Patil\nEmployee ID   : EMP1012\nPAN           : ZZZPZ0012Z\nBank A/c No.  : 0000 0000 0012\n\nPAYSLIP FOR THE MONTH OF AUGUST 2026\n\nEARNINGS                            DEDUCTIONS\nBasic                     20,200    Provident Fund             1,800\nHRA                        8,100    Professional Tax             200\nConveyance                 1,600    Income Tax (TDS)           3,600\nSpecial Allowance         20,700    \n\nGross Earnings            50,600    Total Deductions           5,600\nNet Pay: 45,000\n",
+    "BLUEWAVE LOGISTICS LTD\nEmployee Name : Suresh Patil\nEmployee ID   : EMP1012\nPAN           : ZZZPZ0012Z\nBank A/c No.  : 0000 0000 0012\n\nPAYSLIP FOR THE MONTH OF SEPTEMBER 2026\n\nEARNINGS                            DEDUCTIONS\nBasic                     20,200    Provident Fund             1,800\nHRA                        8,100    Professional Tax             200\nConveyance                 1,600    Income Tax (TDS)           3,600\nSpecial Allowance         20,700    \n\nGross Earnings            50,600    Total Deductions           5,600\nNet Pay: 45,000\n"
+  ]
+}

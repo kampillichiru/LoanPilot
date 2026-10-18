@@ -16,9 +16,11 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import com.loanpilot.orchestrator.application.ApplicationResult.Income;
+import com.loanpilot.orchestrator.application.ApplicationResult.LlmCall;
 import com.loanpilot.orchestrator.application.ApplicationResult.MemoCheck;
 import com.loanpilot.orchestrator.application.ApplicationResult.Slip;
 import com.loanpilot.orchestrator.application.ApplicationResult.Step;
+import com.loanpilot.orchestrator.audit.AuditLog;
 import com.loanpilot.orchestrator.decision.ApplicantFacts;
 import com.loanpilot.orchestrator.decision.Decision;
 import com.loanpilot.orchestrator.decision.Decision.Outcome;
@@ -27,11 +29,13 @@ import com.loanpilot.orchestrator.decision.RuleCheck;
 import com.loanpilot.orchestrator.extract.ExtractRequest;
 import com.loanpilot.orchestrator.extract.ExtractResponse;
 import com.loanpilot.orchestrator.extract.ExtractService;
+import com.loanpilot.orchestrator.guard.LlmGuardAdvisor;
 import com.loanpilot.orchestrator.policy.Citations;
 import com.loanpilot.orchestrator.policy.PolicyChunk;
 import com.loanpilot.orchestrator.policy.PolicyLibrary;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.SimpleLoggerAdvisor;
 import org.springframework.ai.chat.metadata.Usage;
@@ -67,6 +71,7 @@ public class ApplicationService {
     private final ExtractService extractService;
     private final DecisionEngine engine;
     private final PolicyLibrary policy;
+    private final AuditLog auditLog;
     private final ChatClient chatClient;
     private final Resource memoPrompt;
     private final String memoPromptVersion;
@@ -78,6 +83,7 @@ public class ApplicationService {
                               ExtractService extractService,
                               DecisionEngine engine,
                               PolicyLibrary policy,
+                              AuditLog auditLog,
                               ChatClient.Builder builder,
                               @Value("${loanpilot.memo.prompt}") Resource memoPrompt,
                               @Value("${loanpilot.memo.prompt-version}") String memoPromptVersion,
@@ -88,6 +94,7 @@ public class ApplicationService {
         this.extractService = extractService;
         this.engine = engine;
         this.policy = policy;
+        this.auditLog = auditLog;
         this.chatClient = builder.defaultAdvisors(new SimpleLoggerAdvisor()).build();
         this.memoPrompt = memoPrompt;
         this.memoPromptVersion = memoPromptVersion;
@@ -105,6 +112,16 @@ public class ApplicationService {
         }
 
         String id = UUID.randomUUID().toString().substring(0, 8);
+        // Every LLM call below (slips, memo) is audited under this id by the guard (POC 8).
+        MDC.put(LlmGuardAdvisor.MDC_REQUEST_ID, id);
+        try {
+            return run(request, id);
+        } finally {
+            MDC.remove(LlmGuardAdvisor.MDC_REQUEST_ID);
+        }
+    }
+
+    private ApplicationResult run(LoanApplicationRequest request, String id) {
         long start = System.currentTimeMillis();
         List<Step> steps = new ArrayList<>();
         log.info("[app {}] Application for {}: {} over {} months, {} slip(s){}", id, request.applicantId(),
@@ -157,8 +174,9 @@ public class ApplicationService {
                     + " could not be assessed automatically (" + factProblem + "). The decision engine was not run. "
                     + "A credit officer must review the salary slips.";
             return new ApplicationResult(id, request.applicantId(), Outcome.REFER, List.of(factProblem), null, null,
-                    income, report, memo, new MemoCheck("NOT_GENERATED", "REFER", List.of(), List.of(), null, null, null, null),
-                    steps, System.currentTimeMillis() - start);
+                    income, report, memo,
+                    new MemoCheck("NOT_GENERATED", "REFER", List.of(), List.of(), null, null, null, null, null, List.of()),
+                    steps, llmCalls(id), System.currentTimeMillis() - start);
         }
 
         // 3 DECIDE
@@ -193,17 +211,22 @@ public class ApplicationService {
         // 5 MEMO
         t = System.currentTimeMillis();
         log.info("[app {}] 5/5 Writing memo: model={}, prompt={}. Waiting...", id, defaultModel, memoPromptVersion);
+        String input = memoInput(request, income, report, decision, clauses);
         ChatResponse response = chatClient.prompt()
                 .options(OllamaChatOptions.builder().temperature(temperature).seed(seed))
                 .system(memoPrompt)
-                .user(memoInput(request, income, report, decision, clauses))
+                .user(input)
+                .advisors(a -> a.param(LlmGuardAdvisor.PURPOSE, "credit-memo")
+                        .param(LlmGuardAdvisor.PROMPT_VERSION, memoPromptVersion))
                 .call()
                 .chatResponse();
         String memo = response.getResult().getOutput().getText();
         memo = hasText(memo) ? memo : "";
-        MemoCheck check = checkMemo(memo, decision.outcome(), sections, response, memoPromptVersion, defaultModel);
+        MemoCheck check = checkMemo(memo, input, decision, income.netMonthlyIncome(), sections, response,
+                memoPromptVersion, defaultModel);
         steps.add(new Step("MEMO", "OK".equals(check.status()) ? "OK" : "FAILED", System.currentTimeMillis() - t,
-                "check=" + check.status()));
+                "check=" + check.status() + ", faithful=" + check.faithful()
+                        + (check.faithfulnessIssues().isEmpty() ? "" : " " + check.faithfulnessIssues())));
         if (!"OK".equals(check.status())) {
             log.warn("[app {}] 5/5 Memo check {}: memo says {}, engine says {}, unsupported citations {}", id,
                     check.status(), check.memoRecommendation(), decision.outcome(), check.unsupportedCitations());
@@ -212,7 +235,15 @@ public class ApplicationService {
         log.info("[app {}] Done in {} ms: {} (memo check {})", id, totalMs, decision.outcome(), check.status());
 
         return new ApplicationResult(id, request.applicantId(), decision.outcome(), decision.reasonCodes(), decision,
-                facts, income, report, memo, check, steps, totalMs);
+                facts, income, report, memo, check, steps, llmCalls(id), totalMs);
+    }
+
+    /** This application's LLM calls, as the guard recorded them. Counts and hashes only; outputs stay in the log. */
+    private List<LlmCall> llmCalls(String id) {
+        return auditLog.find(id).stream()
+                .map(r -> new LlmCall(r.purpose(), r.model(), r.promptVersion(), r.inputSha256(), r.piiMasked(),
+                        r.promptTokens(), r.completionTokens(), r.latencyMs(), r.id()))
+                .toList();
     }
 
     /** Facts we can't trust are a reason to stop, not to guess. Returns a reason code, or null when all is well. */
@@ -238,6 +269,7 @@ public class ApplicationService {
                 .append(" months").append(hasText(request.purpose()) ? ", purpose: " + request.purpose() : "").append("\n");
         sb.append("Recommendation: ").append(d.outcome()).append("\n");
         sb.append("Reason codes: ").append(d.reasonCodes().isEmpty() ? "none" : String.join(", ", d.reasonCodes())).append("\n");
+        sb.append("Summary opening: ").append(summaryOpening(d)).append("\n");
         sb.append("Income source: ").append("DECLARED".equals(income.source())
                 ? "declared by the applicant, NOT verified" : "average net pay of the last 3 salary slips").append("\n\n");
 
@@ -268,9 +300,31 @@ public class ApplicationService {
         return sb.toString().strip();
     }
 
-    /** The memo must state the engine's recommendation and cite only sections it was given. Decided by code. */
-    static MemoCheck checkMemo(String memo, Outcome outcome, Set<String> providedSections, ChatResponse response,
-                               String promptVersion, String defaultModel) {
+    /**
+     * The memo's conclusion sentence, chosen by code. A 7B model asked to pick between two sentences by a condition
+     * blends them ("recommends APPROVE because all checks passed"), so the choice is made here and the model copies it.
+     */
+    static String summaryOpening(Decision d) {
+        boolean problems = d.checks().stream()
+                .anyMatch(c -> c.status() == RuleCheck.Status.FAIL || c.status() == RuleCheck.Status.REFER);
+        if (problems) {
+            return "The engine recommends " + d.outcome() + " because";
+        }
+        boolean unverified = d.checks().stream().anyMatch(c -> c.status() == RuleCheck.Status.NOT_CHECKED);
+        return unverified
+                ? "The checks the engine could run passed; the items under Not verified still need the credit officer."
+                : "Every check the engine ran passed.";
+    }
+
+    /**
+     * Decided by code. Consistency (status): the memo states the engine's recommendation and cites only sections it
+     * was given. Faithfulness (POC 8): it states only figures from its input, includes the key ones, discloses what
+     * wasn't verified and claims nothing more.
+     */
+    static MemoCheck checkMemo(String memo, String memoInput, Decision decision, BigDecimal netMonthlyIncome,
+                               Set<String> providedSections, ChatResponse response, String promptVersion,
+                               String defaultModel) {
+        Outcome outcome = decision.outcome();
         Matcher m = RECOMMENDATION.matcher(memo);
         String said = m.find() ? m.group(1).toUpperCase(Locale.ROOT) : null;
         List<String> cited = Citations.find(memo);
@@ -281,7 +335,9 @@ public class ApplicationService {
                 : "OK";
         String model = response.getMetadata().getModel();
         Usage usage = response.getMetadata().getUsage();
+        MemoFaithfulness.Result faithfulness = MemoFaithfulness.check(memo, memoInput, decision, netMonthlyIncome);
         return new MemoCheck(status, said, cited, unsupported, hasText(model) ? model : defaultModel, promptVersion,
-                usage != null ? usage.getPromptTokens() : null, usage != null ? usage.getCompletionTokens() : null);
+                usage != null ? usage.getPromptTokens() : null, usage != null ? usage.getCompletionTokens() : null,
+                faithfulness.faithful(), faithfulness.issues());
     }
 }
