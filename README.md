@@ -23,7 +23,7 @@ See [docs/architecture.md](docs/architecture.md) for the full end-to-end design.
 | 4 | First MCP server | MCP server, transports | `mcp-credit-bureau` | ✅ done |
 | 5 | MCP client | Remote tool discovery | `loan-orchestrator` | ✅ done |
 | 6 | RAG over credit policy | Embeddings, chunking, Qdrant | `policy-docs` + orchestrator | ✅ done (16/16) |
-| 7 | Decision engine + workflow | LLM explains, code decides | `loan-orchestrator` | ✅ done (7/7 live) |
+| 7 | Decision engine + workflow | LLM explains, code decides | `loan-orchestrator` | ✅ done (11/11 live) |
 | 8 | Guardrails + evals | PII masking, audit, golden set | `evals` | ⬜ |
 
 Details per POC: [docs/roadmap.md](docs/roadmap.md)

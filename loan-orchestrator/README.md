@@ -299,6 +299,10 @@ POST /api/applications  { applicantId, amount, tenure, 3 salary slips }
 | APP-003 Arjun (fast) | APPROVE §4.4 | ✅ no-history rule, FOIR 19.0% | OK | 243 s |
 | APP-004 Sneha (fast) | APPROVE 11% | ✅ preferential 11%, FOIR 30.2% | OK | 160 s |
 | APP-005 Karan (fast) | REJECT | ✅ CIBIL + enquiries | OK | 180 s |
+| #38 Priya, income 72,600 | REJECT | ✅ `FOIR_EXCEEDED` 50.4% vs ≤ 50% | OK | 160 s |
+| APP-999 (not at the bureau) | REFER | ✅ `BUREAU_NOT_FOUND` | OK | 157 s |
+| Bureau stopped | HTTP 503 | ✅ 503 "not decided", no LLM call | none | 0.01 s |
+| Missing field / bad number / 1 slip | HTTP 400 | ✅ says which field (`amount must be greater than 0`) | none | <0.2 s |
 
 Priya's full run, step by step: BUREAU 21 ms → INCOME 409 s (3 LLM extractions) → DECIDE **2 ms** → POLICY 0 ms →
 MEMO 140 s. The decision is the fastest step; the LLM edges are 99.99% of the time.
