@@ -1,0 +1,12 @@
+{
+  "applicantId": "APP-003",
+  "employmentType": "SALARIED",
+  "amount": 250000,
+  "tenureMonths": 24,
+  "purpose": "Medical expenses",
+  "salarySlips": [
+    "GREENLEAF FOODS PVT LTD\nEmployee Name : Arjun Nair\nEmployee ID   : EMP1003\nPAN           : ZZZPZ0003Z\nBank A/c No.  : 0000 0000 0003\n\nPAYSLIP FOR THE MONTH OF JULY 2026\n\nEARNINGS                            DEDUCTIONS\nBasic                     27,400    Provident Fund             1,800\nHRA                       11,000    Professional Tax             200\nConveyance                 1,600    Income Tax (TDS)           4,920\nSpecial Allowance         28,420    \n\nGross Earnings            68,420    Total Deductions           6,920\nNet Pay: 61,500\n",
+    "GREENLEAF FOODS PVT LTD\nEmployee Name : Arjun Nair\nEmployee ID   : EMP1003\nPAN           : ZZZPZ0003Z\nBank A/c No.  : 0000 0000 0003\n\nPAYSLIP FOR THE MONTH OF AUGUST 2026\n\nEARNINGS                            DEDUCTIONS\nBasic                     27,600    Provident Fund             1,800\nHRA                       11,000    Professional Tax             200\nConveyance                 1,600    Income Tax (TDS)           4,960\nSpecial Allowance         28,760    \n\nGross Earnings            68,960    Total Deductions           6,960\nNet Pay: 62,000\n",
+    "GREENLEAF FOODS PVT LTD\nEmployee Name : Arjun Nair\nEmployee ID   : EMP1003\nPAN           : ZZZPZ0003Z\nBank A/c No.  : 0000 0000 0003\n\nPAYSLIP FOR THE MONTH OF SEPTEMBER 2026\n\nEARNINGS                            DEDUCTIONS\nBasic                     27,800    Provident Fund             1,800\nHRA                       11,100    Professional Tax             200\nConveyance                 1,600    Income Tax (TDS)           5,000\nSpecial Allowance         29,000    \n\nGross Earnings            69,500    Total Deductions           7,000\nNet Pay: 62,500\n"
+  ]
+}

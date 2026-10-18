@@ -1,0 +1,12 @@
+{
+  "applicantId": "APP-004",
+  "employmentType": "SALARIED",
+  "amount": 800000,
+  "tenureMonths": 48,
+  "purpose": "Education",
+  "salarySlips": [
+    "NORTHSTAR ANALYTICS LLP\nEmployee Name : Sneha Reddy\nEmployee ID   : EMP1004\nPAN           : ZZZPZ0004Z\nBank A/c No.  : 0000 0000 0004\n\nPAYSLIP FOR THE MONTH OF JULY 2026\n\nEARNINGS                            DEDUCTIONS\nBasic                     48,100    Provident Fund             1,800\nHRA                       19,200    Professional Tax             200\nConveyance                 1,600    Income Tax (TDS)           8,760\nSpecial Allowance         51,360    \n\nGross Earnings          1,20,260    Total Deductions          10,760\nNet Pay: 1,09,500\n",
+    "NORTHSTAR ANALYTICS LLP\nEmployee Name : Sneha Reddy\nEmployee ID   : EMP1004\nPAN           : ZZZPZ0004Z\nBank A/c No.  : 0000 0000 0004\n\nPAYSLIP FOR THE MONTH OF AUGUST 2026\n\nEARNINGS                            DEDUCTIONS\nBasic                     48,300    Provident Fund             1,800\nHRA                       19,300    Professional Tax             200\nConveyance                 1,600    Income Tax (TDS)           8,800\nSpecial Allowance         51,600    \n\nGross Earnings          1,20,800    Total Deductions          10,800\nNet Pay: 1,10,000\n",
+    "NORTHSTAR ANALYTICS LLP\nEmployee Name : Sneha Reddy\nEmployee ID   : EMP1004\nPAN           : ZZZPZ0004Z\nBank A/c No.  : 0000 0000 0004\n\nPAYSLIP FOR THE MONTH OF SEPTEMBER 2026\n\nEARNINGS                            DEDUCTIONS\nBasic                     48,500    Provident Fund             1,800\nHRA                       19,400    Professional Tax             200\nConveyance                 1,600    Income Tax (TDS)           8,840\nSpecial Allowance         51,840    \n\nGross Earnings          1,21,340    Total Deductions          10,840\nNet Pay: 1,10,500\n"
+  ]
+}

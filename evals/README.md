@@ -6,6 +6,7 @@ a full report (extraction, decision, memo faithfulness).
 | Script | POC | Measures |
 |---|---|---|
 | `run_salary_slip_extraction.py` | 2 | Per-field accuracy of `/api/extract/salary-slip` against `data-generator/out/salary-slips/expected.json` |
+| `run_applications.py` | 7 | Whole workflow: outcome + reason codes vs answer key (must be 100%: it's code), income, memo consistency |
 | `run_policy_rag.py` | 6 | RAG over the credit policy: retrieval hit@1 / hit@k and citation accuracy against `policy-questions.json` |
 
 ```
@@ -20,4 +21,9 @@ Detailed results, including the raw model output, go to `evals/results/` (git-ig
 python evals/run_policy_rag.py --retrieval-only          # seconds, no LLM: tune chunking / topK / minScore
 python evals/run_policy_rag.py                           # full: retrieval + answers + citations (~25 min on CPU)
 python evals/run_policy_rag.py --only q02 --top-k 5      # one question
+```
+
+```
+python evals/run_applications.py --fast                 # declared income: rules + memo (~3 min each)
+python evals/run_applications.py --only APP-001         # full: 3 slips extracted (~10 min on CPU)
 ```

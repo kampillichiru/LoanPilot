@@ -6,9 +6,11 @@ PANs like `ZZZPZ0001Z`, zeroed account numbers. Never put real customer data her
 | Script | POC | Output |
 |---|---|---|
 | `salary_slips.py` | 2 | `out/salary-slips/slip-01..10.txt` + `expected.json` (answer key) |
+| `applicants.py` | 7 | `out/applicants/APP-001..005.json` (POST /api/applications bodies, 3 slips each) + `expected.json` (outcomes) |
 
 ```
 python data-generator/salary_slips.py
+python data-generator/applicants.py
 ```
 
 Each slip has a different layout and one deliberate trap (see `trap` in `expected.json`):

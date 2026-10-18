@@ -1,0 +1,12 @@
+{
+  "applicantId": "APP-001",
+  "employmentType": "SALARIED",
+  "amount": 500000,
+  "tenureMonths": 36,
+  "purpose": "Home renovation",
+  "salarySlips": [
+    "ACME INFOTECH PVT LTD\nEmployee Name : Priya Sharma\nEmployee ID   : EMP1001\nPAN           : ZZZPZ0001Z\nBank A/c No.  : 0000 0000 0001\n\nPAYSLIP FOR THE MONTH OF JULY 2026\n\nEARNINGS                            DEDUCTIONS\nBasic                     37,100    Provident Fund             1,800\nHRA                       14,800    Professional Tax             200\nConveyance                 1,600    Income Tax (TDS)           6,720\nSpecial Allowance         39,220    \n\nGross Earnings            92,720    Total Deductions           8,720\nNet Pay: 84,000\n",
+    "ACME INFOTECH PVT LTD\nEmployee Name : Priya Sharma\nEmployee ID   : EMP1001\nPAN           : ZZZPZ0001Z\nBank A/c No.  : 0000 0000 0001\n\nPAYSLIP FOR THE MONTH OF AUGUST 2026\n\nEARNINGS                            DEDUCTIONS\nBasic                     37,500    Provident Fund             1,800\nHRA                       15,000    Professional Tax             200\nConveyance                 1,600    Income Tax (TDS)           6,800\nSpecial Allowance         39,700    \n\nGross Earnings            93,800    Total Deductions           8,800\nNet Pay: 85,000\n",
+    "ACME INFOTECH PVT LTD\nEmployee Name : Priya Sharma\nEmployee ID   : EMP1001\nPAN           : ZZZPZ0001Z\nBank A/c No.  : 0000 0000 0001\n\nPAYSLIP FOR THE MONTH OF AUGUST 2026\n\nEARNINGS                            DEDUCTIONS\nBasic                     37,500    Provident Fund             1,800\nHRA                       15,000    Professional Tax             200\nConveyance                 1,600    Income Tax (TDS)           6,800\nSpecial Allowance         39,700    \n\nGross Earnings            93,800    Total Deductions           8,800\nNet Pay: 85,000\n"
+  ]
+}

@@ -1,0 +1,48 @@
+{
+  "APP-001.json": {
+    "outcome": "APPROVE",
+    "reasonCodes": [],
+    "netMonthlyIncome": 85000,
+    "why": "the worked example in docs/architecture.md: FOIR 43.1%"
+  },
+  "APP-002.json": {
+    "outcome": "REJECT",
+    "reasonCodes": [
+      "CIBIL_BELOW_MINIMUM",
+      "DPD90_IN_LAST_24M",
+      "CREDIT_HUNGER"
+    ],
+    "netMonthlyIncome": 70000,
+    "why": "score 641, a 90+ DPD account, 5 enquiries"
+  },
+  "APP-003.json": {
+    "outcome": "APPROVE",
+    "reasonCodes": [],
+    "netMonthlyIncome": 62000,
+    "why": "no credit history: approved under §4.4 (income >= 50k, amount <= 3L)"
+  },
+  "APP-004.json": {
+    "outcome": "APPROVE",
+    "reasonCodes": [],
+    "netMonthlyIncome": 110000,
+    "why": "score 805 and FOIR <= 40%: preferential rate 11% (§6.2)"
+  },
+  "APP-005.json": {
+    "outcome": "REJECT",
+    "reasonCodes": [
+      "CIBIL_BELOW_MINIMUM",
+      "CREDIT_HUNGER"
+    ],
+    "netMonthlyIncome": 95000,
+    "why": "score 698, one point under 700; 7 enquiries"
+  },
+  "APP-001-duplicate-month.json": {
+    "outcome": "REFER",
+    "reasonCodes": [
+      "DUPLICATE_PAY_PERIOD"
+    ],
+    "netMonthlyIncome": null,
+    "slipsOnly": true,
+    "why": "the same month sent twice: facts not established, rules not run"
+  }
+}

@@ -241,3 +241,68 @@ in-scope from out-of-scope on its own**, so the prompt's "say not covered" rule 
    (cricket 0.52), so the threshold would need recalibrating. A trade-off, not a free win; not enabled.
 5. **No RAG:** `#32` asks POC 1 the same question. Compare with `#26`.
 6. **Live data:** `#29`. Rule 4: scores come from the bureau over MCP, never from documents.
+
+---
+
+## POC 7: Decision engine + application workflow
+
+POCs 1–6 built separate skills. POC 7 joins them into one loan pipeline and puts each where it belongs:
+**AI reads and writes, Java decides** (rule 1, ADR-0001). It's a fixed **workflow**, not an agent (ADR-0003).
+
+```
+POST /api/applications  { applicantId, amount, tenure, 3 salary slips }
+  1 BUREAU   getCreditReport over MCP, called by CODE (no LLM picks it or fills arguments)    ~0.5 s
+  2 INCOME   LLM extracts each slip (POC 2) → validated → average net pay (§2.1)              ~2 min/slip
+             bad facts (invalid slip, repeated month, different names) → REFER, rules NOT run
+  3 DECIDE   DecisionEngine: pure Java, every rule tied to a § → APPROVE / REFER / REJECT      ~5 ms
+  4 POLICY   clause text for failed/referred rules, looked up BY SECTION (not vector search)
+  5 MEMO     LLM explains the decision; code checks it states the same outcome + valid §       ~3.5 min
+→ outcome, reason codes, decision with every check, facts, memo, memo check, per-step trace
+```
+
+### What's here
+
+| File | Purpose |
+|------|---------|
+| `decision/DecisionEngine.java` | The rules. Each check: code, §, PASS / FAIL / REFER / NOT_CHECKED, actual, limit, reason |
+| `decision/PolicyLimits.java` | Every number, next to its policy clause |
+| `decision/EmiCalculator.java` | The one EMI formula: the engine and the POC 3 `calculateEmi` tool share it |
+| `application/ApplicationService.java` | The 5-step workflow, the fact gate and the memo check |
+| `application/BureauClient.java` | Calls the MCP tool from code; `_meta` carries requestId and applicantId |
+| `policy/PolicyLibrary.java` | Clause by section number, read from the policy document (no Qdrant needed) |
+| `resources/prompts/credit-memo-v*.st` | v1 baseline; v2 = passed rules as section numbers only (faster, no paraphrase) |
+| `test/.../DecisionEngineTest.java` | 18 tests: the 5 applicants and every boundary (FOIR 50.0%, CIBIL 700, 4 vs 5 enquiries, …) |
+| `test/.../ApplicationServiceTest.java` | Workflow with a fake bureau tool and fake LLM: fact gate, memo checks, fail-fast, no PII in the memo input |
+| `../data-generator/applicants.py` | 5 applications (3 slips each, matching the bureau's applicants) + a duplicate-month case |
+| `../evals/run_applications.py` | Outcome + reason codes vs answer key, income, memo consistency. `--fast` skips extraction |
+
+### Design choices
+- **Every rule always runs** (no early return): Rahul's memo lists CIBIL, DPD *and* enquiries, not just the first.
+- **Exact comparison, rounded display**: FOIR 50.04% displays as "50.0%" but fails §4.2.
+- **NOT_CHECKED is explicit**: age (§3.1), employment stability (§3.4), bounces (§4.8), salary vs bank credits
+  (§7.3) need data we don't have yet. They're listed for the officer, never counted as passed.
+- **Facts before rules**: the engine never runs on an invalid slip, a repeated month or mismatched names.
+- **Bureau first**: it's cheap, so an outage fails in 0.5 s, not after 6 minutes of extraction. An outage is a
+  503, not a credit outcome.
+- **Memo input has no name or PAN**: the applicant id only (rule 2 habits, even for a local model).
+- **Lookup vs search**: POC 6 searched by meaning because the question didn't name a clause. Here the code knows
+  FOIR is §4.2, so it looks §4.2 up.
+
+### Results (live, qwen2.5:7b on CPU)
+
+| Case | Expected | Got | Memo | Time |
+|---|---|---|---|---|
+| APP-001 Priya, **3 salary slips** (done-when) | APPROVE | ✅ APPROVE, FOIR 43.1%, 12% | OK | 549 s |
+| APP-001 duplicate pay month | REFER | ✅ REFER `DUPLICATE_PAY_PERIOD`, engine skipped | written by code | 184 s |
+| APP-001 Priya (fast) | APPROVE | ✅ APPROVE, FOIR 43.1% | OK | 284 s |
+| APP-002 Rahul (fast) | REJECT | ✅ CIBIL + 90 DPD + enquiries | OK | 231 s |
+| APP-003 Arjun (fast) | APPROVE §4.4 | ✅ no-history rule, FOIR 19.0% | OK | 243 s |
+| APP-004 Sneha (fast) | APPROVE 11% | ✅ preferential 11%, FOIR 30.2% | OK | 160 s |
+| APP-005 Karan (fast) | REJECT | ✅ CIBIL + enquiries | OK | 180 s |
+
+Priya's full run, step by step: BUREAU 21 ms → INCOME 409 s (3 LLM extractions) → DECIDE **2 ms** → POLICY 0 ms →
+MEMO 140 s. The decision is the fastest step; the LLM edges are 99.99% of the time.
+
+**What the memo check misses** (for POC 8): it checks the outcome and the citations, not content. Sneha's memo
+omits her 11% rate; two memos say "meeting all policy criteria" while 4 checks are NOT_CHECKED; §4.8 shows as
+both passed (DPD) and not verified (bounces) because one clause holds two rules.

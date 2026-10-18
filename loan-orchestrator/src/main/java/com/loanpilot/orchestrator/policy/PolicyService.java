@@ -3,14 +3,11 @@ package com.loanpilot.orchestrator.policy;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
 import java.util.HexFormat;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,9 +40,6 @@ import static org.springframework.util.StringUtils.hasText;
 public class PolicyService {
 
     private static final Logger log = LoggerFactory.getLogger(PolicyService.class);
-
-    /** "§4.2", "§ 4.2", "Section 4.2", "clause 4.2" all count as a citation of 4.2. */
-    private static final Pattern CITATION = Pattern.compile("(?:§|\\b[Ss]ection|\\b[Cc]lause)\\s*(\\d+\\.\\d+)");
 
     static final String NOT_COVERED = "This is not covered by the credit policy: no clause matched the question "
             + "closely enough. Ask a credit officer.";
@@ -179,12 +173,7 @@ public class PolicyService {
     }
 
     static List<String> citations(String answer) {
-        Set<String> found = new LinkedHashSet<>();
-        Matcher m = CITATION.matcher(answer);
-        while (m.find()) {
-            found.add(m.group(1));
-        }
-        return new ArrayList<>(found);
+        return Citations.find(answer);
     }
 
     private static String newId() {

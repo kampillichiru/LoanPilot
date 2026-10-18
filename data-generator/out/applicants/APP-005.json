@@ -1,0 +1,12 @@
+{
+  "applicantId": "APP-005",
+  "employmentType": "SALARIED",
+  "amount": 600000,
+  "tenureMonths": 36,
+  "purpose": "Travel",
+  "salarySlips": [
+    "SUNRISE TEXTILES LTD\nEmployee Name : Karan Mehta\nEmployee ID   : EMP1005\nPAN           : ZZZPZ0005Z\nBank A/c No.  : 0000 0000 0005\n\nPAYSLIP FOR THE MONTH OF JULY 2026\n\nEARNINGS                            DEDUCTIONS\nBasic                     41,800    Provident Fund             1,800\nHRA                       16,700    Professional Tax             200\nConveyance                 1,600    Income Tax (TDS)           7,600\nSpecial Allowance         44,500    \n\nGross Earnings          1,04,600    Total Deductions           9,600\nNet Pay: 95,000\n",
+    "SUNRISE TEXTILES LTD\nEmployee Name : Karan Mehta\nEmployee ID   : EMP1005\nPAN           : ZZZPZ0005Z\nBank A/c No.  : 0000 0000 0005\n\nPAYSLIP FOR THE MONTH OF AUGUST 2026\n\nEARNINGS                            DEDUCTIONS\nBasic                     41,800    Provident Fund             1,800\nHRA                       16,700    Professional Tax             200\nConveyance                 1,600    Income Tax (TDS)           7,600\nSpecial Allowance         44,500    \n\nGross Earnings          1,04,600    Total Deductions           9,600\nNet Pay: 95,000\n",
+    "SUNRISE TEXTILES LTD\nEmployee Name : Karan Mehta\nEmployee ID   : EMP1005\nPAN           : ZZZPZ0005Z\nBank A/c No.  : 0000 0000 0005\n\nPAYSLIP FOR THE MONTH OF SEPTEMBER 2026\n\nEARNINGS                            DEDUCTIONS\nBasic                     41,800    Provident Fund             1,800\nHRA                       16,700    Professional Tax             200\nConveyance                 1,600    Income Tax (TDS)           7,600\nSpecial Allowance         44,500    \n\nGross Earnings          1,04,600    Total Deductions           9,600\nNet Pay: 95,000\n"
+  ]
+}
