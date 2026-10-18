@@ -1,6 +1,174 @@
-# LoanPilot: End-to-End Architecture
+# LoanPilot: Architecture
 
-## Big picture
+Two views:
+- **As built (POC 1–8):** what runs today, where each kind of AI is used, and why.
+- **Target:** the production design the POCs are working towards.
+
+## As built: POC 1–8
+
+### System map
+
+Colours: amber = LLM call, violet = embeddings / vector DB / RAG, teal = plain Java or MCP, dashed = POC 8 (in progress).
+
+```mermaid
+flowchart LR
+  subgraph clients["Clients"]
+    officer["Loan officer<br/>curl · requests.http"]
+    evals["evals/ · Python<br/>golden sets, scores"]
+    datagen["data-generator/ · Python<br/>synthetic slips, applicants"]
+    cc["Claude Code · MCP Inspector<br/>POC 4"]
+  end
+
+  subgraph orch["loan-orchestrator :8080 · Spring Boot 4.1 + Spring AI 2.0"]
+    ask["Ask · POC 1<br/>/api/ask"]
+    extract["Extract · POC 2<br/>/api/extract<br/>LLM reads, Java validates"]
+    rag["Policy RAG · POC 6<br/>/api/policy/ingest · search · ask"]
+    advise["Advise agent · POC 3, 5<br/>/api/advise<br/>LLM picks the tools"]
+    subgraph wf["Application workflow · POC 7 · /api/applications"]
+      direction LR
+      s1["1 Bureau<br/>code"] --> s2["2 Slips<br/>LLM"] --> s3["3 Decide<br/>DecisionEngine"] --> s4["4 § lookup<br/>PolicyLibrary"] --> s5["5 Memo<br/>LLM, code checks"]
+    end
+    guard["POC 8 guard<br/>mask PII · audit log<br/>in progress"]
+  end
+
+  subgraph ext["Separate processes and files"]
+    ollama["Ollama :11434<br/>qwen2.5:7b · chat<br/>nomic-embed-text · 768-d embeddings"]
+    qdrant[("Qdrant :6334<br/>vector DB · 30 clause vectors")]
+    docs["policy-docs/credit-policy-v1.md<br/>30 clauses · source of truth"]
+    bureau["mcp-credit-bureau :8082<br/>MCP · getCreditReport<br/>synthetic data · no LLM"]
+  end
+
+  officer -- HTTP --> ask
+  officer -- HTTP --> wf
+  evals -- HTTP --> rag
+  evals -- HTTP --> wf
+  datagen -- test files --> evals
+  ask -- LLM --> guard
+  extract -- LLM --> guard
+  rag -- "embed + answer" --> guard
+  advise -- LLM --> guard
+  s2 -- LLM --> guard
+  s5 -- LLM --> guard
+  guard -- "chat / embed" --> ollama
+  rag -- "store vectors · top-3 search" --> qdrant
+  docs -- "chunk by clause" --> rag
+  s4 -- "read § by number" --> docs
+  advise -- "MCP · LLM chooses" --> bureau
+  s1 -- "MCP · code calls" --> bureau
+  cc -- "MCP tools/call" --> bureau
+
+  classDef ai fill:#fbefdc,stroke:#a35a00,color:#1b2230
+  classDef rag fill:#ebe6fa,stroke:#5b44b0,color:#1b2230
+  classDef code fill:#dcf0f1,stroke:#0d6a72,color:#1b2230
+  classDef planned fill:#fbefdc,stroke:#a35a00,stroke-dasharray:5 5,color:#1b2230
+  class ask,extract,advise,s2,s5,ollama ai
+  class rag,qdrant rag
+  class s1,s3,s4,bureau code
+  class guard planned
+```
+
+How to read it:
+- **Every LLM call** (Ask, Extract, Advise, the RAG answer, slip reading, memo) goes to Ollama, through the POC 8 guard once it's built.
+- **Only Policy RAG** uses embeddings and the **vector database**. Nothing else needs to search by meaning.
+- **The bureau is reached two ways over MCP:** the Advise agent calls it because the LLM chose to; the workflow calls it because the code always does. Claude Code uses the same tool directly (POC 4).
+- **The workflow does not use RAG.** It already knows the rule is §4.2, so it reads §4.2 from the file (lookup, not search).
+
+### RAG in detail (POC 6)
+
+Two separate moments that share one embedding model, so the numbers are comparable:
+
+```mermaid
+sequenceDiagram
+  participant U as Officer
+  participant P as PolicyService
+  participant E as nomic-embed-text
+  participant Q as Qdrant
+  participant L as qwen2.5:7b
+  Note over P,Q: INGEST, once per policy version
+  P->>P: chunk credit-policy-v1.md by clause (30 chunks)
+  P->>E: embed each clause
+  E-->>P: 768 numbers per clause
+  P->>Q: upsert vector + § + text
+  Note over U,L: ASK, every question
+  U->>P: What is the maximum FOIR?
+  P->>E: embed the question
+  E-->>P: 768 numbers
+  P->>Q: 3 nearest clauses, min score 0.5
+  Q-->>P: §4.2, §4.3, one more
+  P->>L: question + 3 clauses (prompt policy-qa-v2)
+  L-->>P: 50% of net income (§4.2), 45% self-employed (§4.3)
+  P->>P: check every cited § was retrieved
+  P-->>U: answer + citations + scores
+```
+
+Without RAG, the same model said FOIR means "Fixed Operational Interest Rate".
+
+### Application workflow in detail (POC 7)
+
+```mermaid
+sequenceDiagram
+  participant O as Officer
+  participant W as ApplicationService
+  participant B as mcp-credit-bureau
+  participant L as qwen2.5:7b
+  participant D as DecisionEngine
+  participant F as PolicyLibrary
+  O->>W: POST /api/applications (Priya, 5L, 36 months, 3 slips)
+  W->>B: getCreditReport APP-001 (MCP, called by code)
+  B-->>W: CIBIL 762, existing EMIs 20,000
+  loop each of 3 slips
+    W->>L: extract slip (prompt extract-salary-slip-v2)
+    L-->>W: JSON fields
+    W->>W: validate: gross minus deductions equals net
+  end
+  W->>W: fact gate (3 months, same name), average income 85,000
+  W->>D: facts
+  D-->>W: APPROVE, FOIR 43.1%, every check with its § (2 ms)
+  W->>F: clause text for failed or referred rules
+  W->>L: decision + clauses (prompt credit-memo-v2), never "should we approve?"
+  L-->>W: memo
+  W->>W: memo says APPROVE? cites only real §?
+  W-->>O: outcome, checks, memo, memo check, step trace
+```
+
+### Which technique each POC uses
+
+| POC | What | LLM | Embeddings | Vector DB | RAG | MCP | Java decides |
+|---|---|---|---|---|---|---|---|
+| 1 | Talk to a local LLM | chat | – | – | – | – | – |
+| 2 | Read salary slips | extract | – | – | – | – | validation, sums |
+| 3 | Tool calling | picks tools | – | – | – | – | EMI maths |
+| 4 | MCP server | – | – | – | – | server | – |
+| 5 | MCP client | picks tools | – | – | – | client | – |
+| 6 | RAG over policy | answer | nomic | Qdrant | yes | – | § check |
+| 7 | Decision + workflow | slips, memo | – | – | no (lookup) | client | **the decision** |
+| 8 | Guardrails + evals *(in progress)* | guarded | – | – | – | – | mask, audit, score |
+
+### Why each component
+
+| Component | POC | Why we chose it | Trade-off / later |
+|---|---|---|---|
+| Spring AI 2.0 | 1+ | One Java API for chat, structured output, tools, MCP and vector stores | Swap Ollama for Claude with config, not code |
+| Ollama + qwen2.5:7b | 1+ | Runs on the laptop: free, and no data leaves the machine | Slow on CPU (2–4 min per call); GPU or hosted model in production |
+| nomic-embed-text | 6 | Small local embedding model, 768 numbers per text | Changing the model means re-embedding every clause |
+| Qdrant | 6 | Purpose-built vector DB; Windows binary, no Docker; stores § and text with each vector | pgvector once we move to Postgres |
+| MCP (mcp-credit-bureau) | 4, 5, 7 | The bureau owns its data; any AI client uses the same tool through one contract | Needs auth (OAuth) and audit before real use |
+| DecisionEngine (plain Java) | 7 | Same answer every time, unit-tested, explainable rule by rule (ADR-0001) | Limits move to a versioned policy config |
+| Workflow, not agent | 7 | Every application needs the same facts in the same order (ADR-0003) | New steps need code changes |
+| Python (data-generator, evals) | 2+ | Fast scripts outside the product; all data synthetic | Evals run in CI on every prompt change |
+| PII guard + audit log | 8 | Mask PAN, Aadhaar, accounts before any LLM call; record every call | In progress |
+
+### Where AI is deliberately not used
+- **Maths** (EMI, FOIR, totals, averages): Java. The LLM once "added" deductions to 19,700 instead of 11,150.
+- **The decision**: `DecisionEngine`, 2 ms, 18 unit tests. An LLM's output can't be unit-tested or replayed exactly for an audit.
+- **Live data** (credit score, EMIs): MCP tools, never RAG. RAG is for stable documents.
+- **Choosing the steps of an application**: a fixed workflow. The agent once invented an applicant name.
+
+## Target architecture
+
+The production design the POCs are working towards. Some of it isn't built yet (core banking and account aggregator MCP servers, officer screen, state machine, database).
+
+### Big picture (target)
 
 ```
  Applicant (browser)
@@ -30,7 +198,7 @@
                    H2 / Postgres  ←  Ollama :11434
 ```
 
-## Application lifecycle (state machine)
+### Application lifecycle (target state machine)
 
 | Status | What happens | Who | AI? |
 |---|---|---|---|
@@ -47,7 +215,7 @@
 
 Locally there is **no Kafka**: a DB-backed state machine plus Spring events. See ADR-0002.
 
-## Worked example
+### Worked example
 
 Priya, salaried, ₹85,000/month net, existing EMI ₹20,000, wants ₹5,00,000 for 36 months at 12%.
 
@@ -56,7 +224,7 @@ Priya, salaried, ₹85,000/month net, existing EMI ₹20,000, wants ₹5,00,000 
 - CIBIL 762 ≥ 700 ✅ · Max loan 20 × 85,000 = 17L ≥ 5L ✅ · Bounces 0 ✅
 - → **RECOMMEND APPROVE**, memo cites policy §4.2, §4.5, §4.7
 
-## Data model (target)
+### Data model (target)
 
 ```
 customers(id, name, pan_masked, dob, employment_type, employer)

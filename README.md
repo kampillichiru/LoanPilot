@@ -11,7 +11,7 @@ AI agents extract the data, pull mock bureau/bank data through **MCP**, check th
 with **RAG (Qdrant)**, a **rules engine** decides, an LLM writes a **credit memo**, and a human
 credit officer approves. Everything is audited, PII is masked, and quality is measured with **evals**.
 
-See [docs/architecture.md](docs/architecture.md) for the full end-to-end design.
+See [docs/architecture.md](docs/architecture.md) for the system map (where the LLM, RAG and the vector database are used, and why) and the target design.
 
 ## Learning roadmap
 
@@ -36,7 +36,7 @@ LoanPilot/
 ├── CLAUDE.md              ← rules for Claude Code when working in this repo
 ├── LEARNINGS.md           ← your notes after each POC
 ├── docs/
-│   ├── architecture.md    ← end-to-end design
+│   ├── architecture.md    ← system map: as built (POC 1–8) + target design
 │   ├── roadmap.md         ← the 8 POCs in detail
 │   └── adr/               ← Architecture Decision Records
 ├── loan-orchestrator/     ← main Spring Boot app (POC 1, 2, 3, 5, 7)
