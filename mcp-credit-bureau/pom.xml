@@ -18,6 +18,12 @@
 		<spring-ai.version>2.0.1</spring-ai.version>
 	</properties>
 	<dependencies>
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-actuator</artifactId>
+		</dependency>
+
 		<!-- MCP server over HTTP (Streamable HTTP transport) on Spring MVC. No LLM in this service. -->
 		<dependency>
 			<groupId>org.springframework.ai</groupId>
