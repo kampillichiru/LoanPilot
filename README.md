@@ -36,6 +36,7 @@ LoanPilot/
 ├── CLAUDE.md              ← rules for Claude Code when working in this repo
 ├── LEARNINGS.md           ← your notes after each POC
 ├── docs/
+│   ├── overview.md        ← start here: problem, architecture, concepts, code walkthrough (plain language)
 │   ├── architecture.md    ← system map: as built (POC 1–8) + target design
 │   ├── roadmap.md         ← the 8 POCs in detail
 │   └── adr/               ← Architecture Decision Records

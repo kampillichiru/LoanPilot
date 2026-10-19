@@ -8,15 +8,17 @@ Two views:
 
 ### System map
 
-Colours: amber = LLM call, violet = embeddings / vector DB / RAG, teal = plain Java or MCP, dashed = the POC 8 guard.
+Colours: amber = LLM call, violet = embeddings / vector DB / RAG, teal = plain Java or MCP, dashed amber = the POC 8 guard, dashed grey = not built yet.
 
 ```mermaid
 flowchart LR
   subgraph clients["Clients"]
     officer["Loan officer<br/>curl · requests.http"]
-    evals["evals/ · Python<br/>golden sets, scores"]
-    datagen["data-generator/ · Python<br/>synthetic slips, applicants"]
+    evals["evals/ · Python<br/>golden sets, scores<br/>run by hand today"]
+    datagen["data-generator/ · Python<br/>synthetic slips, applicants<br/>+ answer key"]
     cc["Claude Code · MCP Inspector<br/>POC 4"]
+    ci["CI evals · not built<br/>GitHub Actions on every PR"]
+    reports[("evals/reports/*.md<br/>scores per run")]
   end
 
   subgraph orch["loan-orchestrator :8080 · Spring Boot 4.1 + Spring AI 2.0"]
@@ -36,14 +38,17 @@ flowchart LR
     ollama["Ollama :11434<br/>qwen2.5:7b · chat<br/>nomic-embed-text · 768-d embeddings"]
     qdrant[("Qdrant :6334<br/>vector DB · 30 clause vectors")]
     docs["policy-docs/credit-policy-v1.md<br/>30 clauses · source of truth"]
-    bureau["mcp-credit-bureau :8082<br/>MCP · getCreditReport<br/>synthetic data · no LLM"]
+    bureau["mcp-credit-bureau :8082<br/>MCP · getCreditReport<br/>in-memory list · 19 synthetic applicants · no LLM"]
   end
 
   officer -- HTTP --> ask
   officer -- HTTP --> wf
+  evals -- HTTP --> extract
   evals -- HTTP --> rag
   evals -- HTTP --> wf
-  datagen -- test files --> evals
+  datagen -- "test files + expected.json" --> evals
+  evals -- "scores" --> reports
+  ci -. "would run a fast subset" .-> evals
   ask -- LLM --> guard
   extract -- LLM --> guard
   rag -- "answer" --> guard
@@ -64,11 +69,13 @@ flowchart LR
   classDef rag fill:#ebe6fa,stroke:#5b44b0,color:#1b2230
   classDef code fill:#dcf0f1,stroke:#0d6a72,color:#1b2230
   classDef planned fill:#fbefdc,stroke:#a35a00,stroke-dasharray:5 5,color:#1b2230
+  classDef future fill:#eeeeee,stroke:#777777,stroke-dasharray:5 5,color:#1b2230
   class ask,extract,advise,s2,s5,ollama ai
   class rag,qdrant rag
   class s1,s3,s4,bureau code
   class guard planned
-  class auditlog code
+  class auditlog,reports code
+  class ci future
 ```
 
 How to read it:
@@ -76,6 +83,52 @@ How to read it:
 - **Only Policy RAG** uses embeddings and the **vector database**. Nothing else needs to search by meaning.
 - **The bureau is reached two ways over MCP:** the Advise agent calls it because the LLM chose to; the workflow calls it because the code always does. Claude Code uses the same tool directly (POC 4).
 - **The workflow does not use RAG.** It already knows the rule is §4.2, so it reads §4.2 from the file (lookup, not search).
+- **Evals are outside clients.** Python scripts call the running app over HTTP, like Postman would. Nothing in the Java code calls them. Today you run them by hand; CI evals (dashed grey) aren't built.
+- **There is no database.** No H2, no Postgres. See "Where data lives today" below.
+
+### Where data lives today (no database)
+
+| Data | Today | Target |
+|---|---|---|
+| Bureau reports | In-memory `List` in `BureauRepository` (19 synthetic applicants) | Real bureau API behind the same MCP tool |
+| Policy vectors | Qdrant (a vector DB, not a relational DB) | Qdrant, or pgvector on Postgres |
+| LLM audit log | `audit/llm-calls.jsonl`, append-only, git-ignored | `audit_log` table with retention and access control |
+| Applications, decisions, memos | Not stored: returned in the API response | `loan_applications`, `decisions`, `credit_memos` tables |
+| Eval answer key | `data-generator/out/applicants/expected.json` | Same, versioned with the golden set |
+
+A database is needed once an application has to be remembered between calls: the state machine and officer review in the target design.
+
+### Evals: today vs CI (POC 8)
+
+```mermaid
+flowchart LR
+  subgraph today["Today · by hand"]
+    you["You<br/>python evals/run_applications.py"]
+  end
+  subgraph later["Not built · CI"]
+    pr["Pull request<br/>e.g. edit credit-memo-v6.st"] --> gha["GitHub Actions<br/>mvnw verify, start services"]
+  end
+  key[("expected.json<br/>answer key, checked by a<br/>2nd Python policy")]
+  app["loan-orchestrator :8080<br/>/api/extract · /api/policy · /api/applications"]
+  report[("evals/reports/*.md<br/>extraction · decision ·<br/>faithfulness · PII · audit %")]
+  gate{"score ≥ threshold?"}
+
+  you -- HTTP --> app
+  gha -. "fast subset, HTTP" .-> app
+  app -- responses --> cmp["compare with answer key"]
+  key --> cmp
+  cmp --> report
+  report -.-> gate
+  gate -. no .-> block["block the merge"]
+  gate -. yes .-> merge["allow the merge"]
+
+  classDef code fill:#dcf0f1,stroke:#0d6a72,color:#1b2230
+  classDef future fill:#eeeeee,stroke:#777777,stroke-dasharray:5 5,color:#1b2230
+  class you,app,key,report,cmp code
+  class pr,gha,gate,block,merge future
+```
+
+Same scripts either way. CI only adds the trigger (every pull request) and a pass/fail threshold. The blocker is speed: the full golden set takes about 3 hours on CPU, so CI would run a small `--fast` subset of boundary cases.
 
 ### RAG in detail (POC 6)
 
