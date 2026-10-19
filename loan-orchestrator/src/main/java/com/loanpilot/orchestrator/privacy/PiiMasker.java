@@ -73,4 +73,5 @@ public class PiiMasker {
         counts.merge(type, found, Integer::sum);
         return sb.toString();
     }
+
 }
