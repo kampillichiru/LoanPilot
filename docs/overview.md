@@ -119,7 +119,117 @@ Each POC adds one AI idea on top of the last. For each one: what it is, a tiny e
 - **Example:** `ABCDE1234F` reaches the model as `[PAN]`. The golden set of 20 boundary applicants (FOIR exactly 50% vs 50.002%) scored 21/21 on decisions.
 - **Why:** It enforces rules 2 and 3 in one place (`LlmGuardAdvisor`), so new services get them for free. A memo faithfulness check in code confirms every number in the memo came from the input.
 
-## 4. Code walkthrough: one application, start to finish
+## 4. RAG in depth
+
+RAG makes the model answer from our policy text instead of from memory. Without it, `qwen2.5:7b` says FOIR means "Fixed Operational Interest Rate, 9% to 14%". With it, the answer is 50% (§4.2) and 45% for self-employed (§4.3), with citations. It runs in two phases at different times.
+
+```mermaid
+flowchart LR
+  subgraph ingest["INGEST · once per policy version (/api/policy/ingest)"]
+    direction LR
+    a1["Policy file<br/>credit-policy-v1.md<br/>30 clauses"] --> a2["Chunk by clause<br/>one chunk per §<br/>+ heading breadcrumb"]
+    a2 --> a3["Embed<br/>nomic-embed-text<br/>768 numbers each"] --> a4[("Store in Qdrant<br/>vector + text + §<br/>re-run safe")]
+  end
+  subgraph ask["ASK · every question (/api/policy/ask)"]
+    direction LR
+    b1["Question<br/>What is the max FOIR?"] --> b2["Embed question<br/>same model as chunks"]
+    b2 --> b3["Search Qdrant<br/>top 3 clauses<br/>cosine ≥ 0.5"]
+    b3 -- "≥ 1 match" --> b4["LLM answers<br/>from those clauses<br/>policy-qa-v2, temp 0"]
+    b3 -- "none ≥ 0.5 · guard 1" --> c1["Not covered<br/>code replies, no LLM"]
+    b4 -- "guard 2" --> c2["Check citations<br/>each § was retrieved<br/>then answer + scores"]
+  end
+  b3 -. "nearest vectors" .-> a4
+```
+
+The top row runs once per policy version; the bottom row runs for every question. Both use the same embedding model, so their numbers are comparable.
+
+### Ingest: once per policy version
+
+Code: `PolicyIngestService.ingest()`.
+
+1. **Chunk by clause.** `PolicyChunker` splits the markdown on `### §4.2 ...` headings, one chunk per clause, and puts a breadcrumb line on top of each.
+2. **Wrap each chunk as a `Document`.** The text is embedded; the metadata (`docId`, `section`, `title`) travels with the vector but is not embedded. The id is a name-based UUID, so the same input always gives the same id.
+3. **Delete, then add.** `vectorStore.delete("docId == 'credit-policy-v1'")` removes old chunks, then `vectorStore.add(documents)` embeds each text with `nomic-embed-text` and writes vector, text and metadata to Qdrant.
+
+What one chunk looks like:
+
+```
+4. Credit and affordability rules > §4.2 Maximum FOIR for salaried applicants
+Total EMIs, including the new loan, must not exceed 50% of net monthly income...
+```
+
+The breadcrumb matters because Spring AI embeds only the text. Without the heading in the text, words like "affordability" and "FOIR" can't help the search.
+
+Chunking was the biggest lever, measured on 16 questions:
+
+| Chunking | Chunks | hit@1 | hit@3 |
+| --- | --- | --- | --- |
+| Clause (one § per chunk) | 30 | 77% | 100% |
+| Fixed 500 characters | 13 | 77% | 92%, each chunk mixed 3–4 clauses |
+| Fixed 200 characters | 32 | 69% | 92% |
+
+### What an embedding is
+
+An embedding is 768 numbers that represent what a text means. Texts with similar meaning point in similar directions, and Qdrant compares directions with cosine similarity (1.0 = same, 0 = unrelated). Java analogy: like `hashCode()`, but similar inputs give nearby outputs instead of random ones.
+
+That is how "how much salary can go towards EMIs?" finds the FOIR clause with almost no shared words (3rd place, score 0.557). Questions and chunks must use the same embedding model; changing the model means re-embedding every chunk.
+
+### Ask: every question
+
+Code: `PolicyService.ask()`.
+
+1. **Retrieve.** `vectorStore.similaritySearch()` with `topK(3)`, `similarityThreshold(0.5)` and a `docId` filter. About 0.1 s; `/api/policy/search` runs only this step, for tuning.
+2. **Guard 1: refuse before the LLM.** If no clause scores ≥ 0.5, code answers "not covered". The model is never asked, so it can't improvise.
+3. **Build the prompt.** Each clause goes in the user message with its label, then the question:
+
+```
+Policy clauses:
+
+[§4.2]
+4. Credit and affordability rules > §4.2 Maximum FOIR for salaried applicants
+Total EMIs ... must not exceed 50% ...
+
+[§4.3]
+... self-employed ... 45% ...
+
+Question: What is the maximum FOIR?
+```
+
+4. **Call the LLM.** The system prompt `policy-qa-v2.st` says: answer only from the clauses, cite every rule as §x.y, cite the clause that sets the rule (not a definition), say "not covered" if they don't answer it, quote numbers exactly, never approve or reject. Temperature 0.0 with a fixed seed, through `LlmGuardAdvisor`.
+5. **Guard 2: check citations.** `Citations.find()` pulls every § from the answer; any § that was not retrieved marks the answer `UNSUPPORTED_CITATION`. The response returns the answer, citations, check result, and each retrieved § with its score.
+
+### Why retrieval is written by hand
+
+Spring AI's `QuestionAnswerAdvisor` does retrieval inside the `ChatClient` call in one line. Doing it explicitly gives three things the one-liner hides: retrieved clauses and scores come back for audit (rule 3), code can refuse before calling the LLM (guard 1), and code can check citations against what was retrieved (guard 2).
+
+### What the experiments taught
+
+| Finding | What it means |
+| --- | --- |
+| Correct clauses scored 0.70–0.83; "cryptocurrency" still scored 0.58 | Scores are squashed together. A threshold stops nonsense but can't decide scope; the prompt has to |
+| The right clause came 3rd for three questions, and the model still used it | `top-k > 1` matters: the LLM re-ranks what retrieval gives it |
+| "Is a bounced EMI a problem?" cited §2.4 (the definition), not §4.8 (the rule) | Guard 2 passed it because §2.4 was retrieved. A guard checks that a citation exists, not that it supports the sentence. Prompt v2 fixed it |
+| nomic's `search_query:` prefixes fixed one paraphrase but cut the §4.2 vs §4.3 margin to 0.001 | Every change is a trade-off to measure with the eval, not a default |
+| "What is Priya's CIBIL score?" is answered as not in the policy | Rule 4 holds: live data comes from MCP, never RAG |
+
+### RAG, lookup or MCP?
+
+| You need | Use | LoanPilot example |
+| --- | --- | --- |
+| Text found by meaning, location unknown | RAG | An officer's free-form policy question |
+| Text whose location you already know | Lookup | Workflow knows the failed rule is §4.2, so `PolicyLibrary` reads §4.2 |
+| Live, changing data | MCP tool | CIBIL score, existing EMIs |
+
+That is why the POC 7 workflow doesn't use RAG: searching for something you can address directly only adds a chance of retrieving the wrong clause.
+
+### Gaps before production
+
+- Version the index: store policy version and effective date, filter by the version in force on the application date.
+- Hybrid search (keyword + vector), so exact terms like "§4.8" or "FOIR" can't be outranked.
+- A citation-support check: does the cited clause actually contain the claimed number?
+- Mask and audit embedding calls; they bypass `ChatClient` and the guard today.
+
+## 5. Code walkthrough: one application, start to finish
 
 One call, `POST /api/applications`, takes Priya from application to credit memo. The whole flow lives in `ApplicationService.run()`, about 120 lines, in 5 numbered steps. Paths below are under `loan-orchestrator/src/main/java/com/loanpilot/orchestrator/`.
 
@@ -190,7 +300,7 @@ This is the part you never see in the services, by design:
 | `/api/policy/ingest`, `/search`, `/ask` | `policy/` (`PolicyChunker`, `QdrantVectorCollection`) | 6 |
 | `/api/applications` | `application/`, `decision/` | 7, 8 |
 
-## 5. FAQ
+## 6. FAQ
 
 ### Did we use Postgres?
 
@@ -254,7 +364,7 @@ The top path runs today (dashed = not built yet). CI would call the same endpoin
 - No auth on the MCP server.
 - Claude API profile (cloud LLM) not added; everything runs on local Ollama.
 
-## 6. Glossary
+## 7. Glossary
 
 | Term | Plain meaning |
 | --- | --- |
